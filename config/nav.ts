@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Users,
+  IndianRupee,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -17,6 +18,11 @@ export const navItems: NavItem[] = [
     title: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Room Expenses",
+    href: "/expenses",
+    icon: IndianRupee,
   },
   {
     title: "Users",

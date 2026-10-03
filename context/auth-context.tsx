@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useSyncExternalStore } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/auth";
 import {
@@ -23,25 +23,18 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const emptySubscribe = () => () => {};
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
-  const [user, setUser] = useState<User | null>(() => {
-    if (typeof window !== "undefined") {
-      return getStoredUser();
-    }
-    return null;
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setTokenState] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const [token, setTokenState] = useState<string | null>(() => {
-    if (typeof window !== "undefined") {
-      return getToken() ?? null;
-    }
-    return null;
-  });
+  useEffect(() => {
+    setUser(getStoredUser());
+    setTokenState(getToken() ?? null);
+    setIsLoading(false);
+  }, []);
 
   const login = (newToken: string, newUser: User, redirectPath = "/dashboard") => {
     setToken(newToken);
@@ -74,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         token,
-        isLoading: !isClient,
+        isLoading,
         isAuthenticated: !!token,
         login,
         logout,

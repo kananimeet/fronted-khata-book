@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useSyncExternalStore } from "react";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import {
@@ -14,11 +14,18 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getProfilePictureUrl } from "@/lib/api";
 
+const emptySubscribe = () => () => {};
+
 export function UserNav() {
   const { user, logout } = useAuth();
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   const getInitials = (name?: string) => {
-    if (!name) return "AD";
+    if (!name) return "U";
     const parts = name.trim().split(" ");
     if (parts.length >= 2) {
       return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
@@ -26,10 +33,18 @@ export function UserNav() {
     return name.slice(0, 2).toUpperCase();
   };
 
-  const displayName = user?.name || "Admin User";
-  const displayEmail = user?.email || "admin@example.com";
-  const displayRole = user?.role || "Administrator";
+  const displayName = user?.name || "User";
+  const displayEmail = user?.email || "";
+  const displayRole = user?.role || "Member";
   const profileUrl = getProfilePictureUrl(user?.profile_picture);
+
+  if (!mounted) {
+    return (
+      <div className="relative flex items-center p-1">
+        <div className="h-9 w-9 rounded-full bg-primary/10 border border-border" />
+      </div>
+    );
+  }
 
   return (
     <DropdownMenu>
