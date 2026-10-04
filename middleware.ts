@@ -6,6 +6,7 @@ const PROTECTED_ROUTES = [
   "/users",
   "/settings",
   "/expenses",
+  "/daily-expenses",
   "/admin",
 ];
 const AUTH_ROUTES = ["/login", "/admin/login"];

@@ -29,6 +29,7 @@ export function getProfilePictureUrl(path?: string | null): string | undefined {
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
     "X-Tunnel-Skip-Anti-Phishing-Page": "true",
@@ -53,9 +54,30 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor: Handle 401 responses by clearing token and redirecting to /login
+import { invalidateCache } from "./api-cache";
+export * from "./api-cache";
+
+// Response interceptor: Invalidate cache on mutations and handle 401 responses
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const method = response.config?.method?.toLowerCase();
+    if (method && ["post", "patch", "put", "delete"].includes(method)) {
+      const url = response.config?.url || "";
+      if (url.includes("/daily-expenses")) {
+        invalidateCache("daily-expenses");
+      }
+      if (url.includes("/expenses")) {
+        invalidateCache("expenses");
+      }
+      if (url.includes("/users")) {
+        invalidateCache("users");
+      }
+      if (url.includes("/settings")) {
+        invalidateCache("settings");
+      }
+    }
+    return response;
+  },
   (error: AxiosError) => {
     if (error.response && error.response.status === 401) {
       clearAuthData();

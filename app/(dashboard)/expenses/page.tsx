@@ -96,6 +96,23 @@ function ExpensesContent() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
+  // Hydrate from localStorage strictly on client post-hydration to prevent SSR mismatch
+  useEffect(() => {
+    try {
+      const item = localStorage.getItem("khatabook_room_expenses_cache");
+      if (item) {
+        const cached = JSON.parse(item);
+        if (cached?.items && Array.isArray(cached.items) && cached.items.length > 0) {
+          setExpenses(cached.items);
+          if (cached.summary) setSummaryStats(cached.summary);
+          if (typeof cached.total === "number") setTotalExpenses(cached.total);
+          if (typeof cached.totalPages === "number") setTotalPages(cached.totalPages);
+          setIsLoading(false);
+        }
+      }
+    } catch {}
+  }, []);
+
   // Dialog States
   const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
   const [payDialogOpen, setPayDialogOpen] = useState<boolean>(false);
@@ -115,6 +132,37 @@ function ExpensesContent() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  // Helper to calculate summary numbers if backend does not return summary object
+  const calculateClientSummary = useCallback((items: Expense[]) => {
+    let roomRate = 0;
+    let approved = 0;
+    let pending = 0;
+    let remaining = 0;
+
+    items.forEach((item) => {
+      roomRate += Number(item.total_amount) || 0;
+      approved += Number(item.paid_amount) || 0;
+      if (item.status === "PENDING") {
+        pending += Number(item.pay_amount) || 0;
+      } else {
+        const pendingP = item.payments?.find((p) => p.status === "PENDING");
+        if (pendingP) {
+          pending += Number(pendingP.amount) || 0;
+        }
+      }
+      remaining += Number(item.remaining_amount) || 0;
+    });
+
+    const summary = {
+      totalRoomRate: roomRate,
+      totalApproved: approved,
+      totalPending: pending,
+      totalRemaining: remaining,
+    };
+    setSummaryStats(summary);
+    return summary;
+  }, []);
 
   // Fetch Expenses List
   const fetchExpensesList = useCallback(
@@ -146,7 +194,7 @@ function ExpensesContent() {
           params.status = activeStatus;
         }
 
-        const data = await getExpenses(params);
+        const data = await getExpenses(params, showRefreshSpinner);
 
         if (data) {
           // Extract items: backend returns { items: [...], meta: {...}, summary: {...} }
@@ -205,6 +253,7 @@ function ExpensesContent() {
           }, 0);
 
           // Summary stats (supports both totalRoomRate and totalRoomRateAmount naming)
+          let currentSummary = null;
           if (data.summary) {
             const rawPending =
               Number(
@@ -212,7 +261,7 @@ function ExpensesContent() {
                   data.summary.totalPendingAmount
               ) || 0;
 
-            setSummaryStats({
+            currentSummary = {
               totalRoomRate:
                 Number(
                   data.summary.totalRoomRate ??
@@ -229,9 +278,27 @@ function ExpensesContent() {
                   data.summary.totalRemaining ??
                     data.summary.totalRemainingAmount
                 ) || 0,
-            });
+            };
+            setSummaryStats(currentSummary);
           } else {
-            calculateClientSummary(items);
+            currentSummary = calculateClientSummary(items);
+          }
+
+          // Cache first page default list for instant display next time
+          if (!activeSearch.trim() && activeStatus === "ALL" && page === 1) {
+            if (typeof window !== "undefined") {
+              try {
+                localStorage.setItem(
+                  "khatabook_room_expenses_cache",
+                  JSON.stringify({
+                    items,
+                    total: totalCount,
+                    totalPages: pagesCount,
+                    summary: currentSummary,
+                  })
+                );
+              } catch {}
+            }
           }
         }
       } catch (err: unknown) {
@@ -241,37 +308,8 @@ function ExpensesContent() {
         setIsRefreshing(false);
       }
     },
-    [debouncedSearch, statusFilter, toast]
+    [debouncedSearch, statusFilter, toast, calculateClientSummary]
   );
-
-  // Helper to calculate summary numbers if backend does not return summary object
-  const calculateClientSummary = (items: Expense[]) => {
-    let roomRate = 0;
-    let approved = 0;
-    let pending = 0;
-    let remaining = 0;
-
-    items.forEach((item) => {
-      roomRate += Number(item.total_amount) || 0;
-      approved += Number(item.paid_amount) || 0;
-      if (item.status === "PENDING") {
-        pending += Number(item.pay_amount) || 0;
-      } else {
-        const pendingP = item.payments?.find((p) => p.status === "PENDING");
-        if (pendingP) {
-          pending += Number(pendingP.amount) || 0;
-        }
-      }
-      remaining += Number(item.remaining_amount) || 0;
-    });
-
-    setSummaryStats({
-      totalRoomRate: roomRate,
-      totalApproved: approved,
-      totalPending: pending,
-      totalRemaining: remaining,
-    });
-  };
 
   // Fetch User Totals (Admin View)
   const fetchUserTotals = useCallback(async () => {
@@ -578,7 +616,7 @@ function ExpensesContent() {
         open={payDialogOpen}
         onOpenChange={setPayDialogOpen}
         onPaymentSubmitted={() => {
-          fetchExpensesList(currentPage);
+          fetchExpensesList(currentPage, true);
           if (isAdmin) fetchUserTotals();
         }}
       />
@@ -606,7 +644,7 @@ function ExpensesContent() {
           open={approveDialogOpen}
           onOpenChange={setApproveDialogOpen}
           onApproved={() => {
-            fetchExpensesList(currentPage);
+            fetchExpensesList(currentPage, true);
             fetchUserTotals();
           }}
         />
@@ -619,7 +657,7 @@ function ExpensesContent() {
           open={rejectDialogOpen}
           onOpenChange={setRejectDialogOpen}
           onRejected={() => {
-            fetchExpensesList(currentPage);
+            fetchExpensesList(currentPage, true);
             fetchUserTotals();
           }}
         />
@@ -632,7 +670,7 @@ function ExpensesContent() {
           open={editDialogOpen}
           onOpenChange={setEditDialogOpen}
           onUpdated={() => {
-            fetchExpensesList(currentPage);
+            fetchExpensesList(currentPage, true);
             fetchUserTotals();
           }}
         />
@@ -645,7 +683,7 @@ function ExpensesContent() {
           open={deleteDialogOpen}
           onOpenChange={setDeleteDialogOpen}
           onDeleted={() => {
-            fetchExpensesList(currentPage);
+            fetchExpensesList(currentPage, true);
             fetchUserTotals();
           }}
         />

@@ -9,28 +9,39 @@ import {
   AlertTriangle,
   Home,
   RotateCw,
-  ArrowRight,
   PlusCircle,
-  Inbox,
-  User as UserIcon,
   TrendingUp,
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { getExpenses } from "@/lib/expense-api";
 import { Expense } from "@/types/expense";
-import { formatCurrency, formatDate } from "@/lib/utils";
-import { ExpenseStatusBadge } from "@/components/expenses/expense-status-badge";
+import { formatCurrency } from "@/lib/utils";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DailyExpensesChart } from "@/components/dashboard/daily-expenses-chart";
+
+const DASHBOARD_CACHE_KEY = "khatabook_dashboard_cache";
+
+interface CachedDashboardData {
+  expenses: Expense[];
+  totalCount: number;
+  pendingCount: number;
+  summary: {
+    totalRoomRate: number;
+    totalApproved: number;
+    totalPending: number;
+    totalRemaining: number;
+  };
+  timestamp: number;
+}
 
 export default function DashboardPage() {
   const { user } = useAuth();
+
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [pendingCount, setPendingCount] = useState<number>(0);
@@ -40,11 +51,29 @@ export default function DashboardPage() {
     totalPending: 0,
     totalRemaining: 0,
   });
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
-  const fetchDashboardData = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setIsRefreshing(true);
+  // Hydrate from localStorage strictly on client post-hydration to prevent SSR mismatch
+  useEffect(() => {
+    try {
+      const item = localStorage.getItem(DASHBOARD_CACHE_KEY);
+      if (item) {
+        const cached = JSON.parse(item);
+        if (cached) {
+          if (cached.expenses) setExpenses(cached.expenses);
+          if (typeof cached.totalCount === "number") setTotalCount(cached.totalCount);
+          if (typeof cached.pendingCount === "number") setPendingCount(cached.pendingCount);
+          if (cached.summary) setSummary(cached.summary);
+          setIsLoading(false);
+        }
+      }
+    } catch {}
+  }, []);
+
+  const fetchDashboardData = useCallback(async (isManualRefresh = false) => {
+    if (isManualRefresh) setIsRefreshing(true);
     else setIsLoading(true);
 
     try {
@@ -91,6 +120,13 @@ export default function DashboardPage() {
           return acc;
         }, 0);
 
+        let newSummary = {
+          totalRoomRate: 0,
+          totalApproved: 0,
+          totalPending: 0,
+          totalRemaining: 0,
+        };
+
         // Summary totals
         if (data.summary) {
           const rawPending =
@@ -98,7 +134,7 @@ export default function DashboardPage() {
               data.summary.totalPending ?? data.summary.totalPendingAmount
             ) || 0;
 
-          setSummary({
+          newSummary = {
             totalRoomRate:
               Number(
                 data.summary.totalRoomRate ?? data.summary.totalRoomRateAmount
@@ -113,7 +149,7 @@ export default function DashboardPage() {
                 data.summary.totalRemaining ??
                   data.summary.totalRemainingAmount
               ) || 0,
-          });
+          };
         } else {
           let roomRate = 0;
           let approved = 0;
@@ -133,12 +169,33 @@ export default function DashboardPage() {
             rem += Number(item.remaining_amount) || 0;
           });
 
-          setSummary({
+          newSummary = {
             totalRoomRate: roomRate,
             totalApproved: approved,
             totalPending: pend,
             totalRemaining: rem,
-          });
+          };
+        }
+
+        setSummary(newSummary);
+
+        // Cache latest data into localStorage for instant 0ms reload on refresh
+        try {
+          if (typeof window !== "undefined") {
+            const cachePayload: CachedDashboardData = {
+              expenses: items,
+              totalCount: total,
+              pendingCount: pending,
+              summary: newSummary,
+              timestamp: Date.now(),
+            };
+            localStorage.setItem(
+              DASHBOARD_CACHE_KEY,
+              JSON.stringify(cachePayload)
+            );
+          }
+        } catch {
+          // Ignore localStorage quota errors
         }
       }
     } catch (err) {
@@ -226,7 +283,7 @@ export default function DashboardPage() {
             variant="outline"
             size="icon"
             onClick={() => fetchDashboardData(true)}
-            disabled={isLoading || isRefreshing}
+            disabled={isRefreshing}
             title="Refresh dashboard stats"
             className="h-9 w-9"
           >
@@ -268,12 +325,22 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="mt-3">
-                  <div className="text-2xl font-bold tracking-tight text-foreground">
-                    {isLoading ? "..." : stat.value}
+                  <div className="text-2xl font-bold tracking-tight text-foreground font-mono">
+                    {isLoading ? (
+                      <Skeleton className="h-8 w-28 my-1" />
+                    ) : (
+                      stat.value
+                    )}
                   </div>
                   <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <TrendingUp className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <span className="truncate">{stat.subtitle}</span>
+                    {isLoading ? (
+                      <Skeleton className="h-3.5 w-36" />
+                    ) : (
+                      <>
+                        <TrendingUp className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span className="truncate">{stat.subtitle}</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -282,145 +349,8 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* Recent Room Expense Requests Activity */}
-      <Card className="border-border shadow-xs overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-border">
-          <div>
-            <CardTitle className="text-base font-bold">
-              Recent Room Rate Expense Requests
-            </CardTitle>
-            <CardDescription className="text-xs mt-0.5">
-              Latest requests submitted by members across the platform.
-            </CardDescription>
-          </div>
-          <Button asChild variant="outline" size="sm" className="gap-1.5 h-8 text-xs font-medium">
-            <Link href="/expenses">
-              <span>View All</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </Button>
-        </CardHeader>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="p-8 text-center space-y-3">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
-              <p className="text-xs text-muted-foreground">Loading recent expenses...</p>
-            </div>
-          ) : expenses.length === 0 ? (
-            <div className="flex min-h-[220px] flex-col items-center justify-center p-8 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground mb-3">
-                <Inbox className="h-6 w-6" />
-              </div>
-              <h3 className="text-sm font-semibold text-foreground">
-                No expense requests found
-              </h3>
-              <p className="mt-1 text-xs text-muted-foreground max-w-sm">
-                No room rate payment requests have been submitted yet.
-              </p>
-              <Button asChild size="sm" className="mt-4 gap-1.5 text-xs font-semibold">
-                <Link href="/expenses">
-                  <PlusCircle className="h-3.5 w-3.5" />
-                  <span>Create First Expense Request</span>
-                </Link>
-              </Button>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase font-semibold text-[11px] tracking-wider">
-                  <tr>
-                    <th className="px-4 py-3">User</th>
-                    <th className="px-4 py-3">Purpose / Note</th>
-                    <th className="px-4 py-3">Room Rent</th>
-                    <th className="px-4 py-3">Requested Pay</th>
-                    <th className="px-4 py-3">Approved Paid</th>
-                    <th className="px-4 py-3">Remaining</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/60">
-                  {expenses.slice(0, 5).map((expense) => {
-                    const total = Number(expense.total_amount) || 0;
-                    const pay = Number(expense.pay_amount) || 0;
-                    const paid = Number(expense.paid_amount) || 0;
-                    const remaining = Number(expense.remaining_amount) || 0;
-
-                    return (
-                      <tr
-                        key={expense.id}
-                        className="hover:bg-muted/30 transition-colors"
-                      >
-                        {/* User name & avatar */}
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2.5">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs shrink-0">
-                              {expense.user?.name?.charAt(0).toUpperCase() || (
-                                <UserIcon className="h-3.5 w-3.5" />
-                              )}
-                            </div>
-                            <div className="min-w-0">
-                              <div className="font-semibold text-foreground truncate max-w-[120px]">
-                                {expense.user?.name || "Unknown"}
-                              </div>
-                              <div className="text-[10px] text-muted-foreground truncate max-w-[120px]">
-                                {expense.user?.email || ""}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Note */}
-                        <td className="px-4 py-3 font-medium text-foreground max-w-[160px] truncate">
-                          {expense.note || "room pay"}
-                        </td>
-
-                        {/* Room Rent */}
-                        <td className="px-4 py-3 font-semibold text-foreground whitespace-nowrap">
-                          {formatCurrency(total)}
-                        </td>
-
-                        {/* Requested Pay */}
-                        <td className="px-4 py-3 font-semibold text-primary whitespace-nowrap">
-                          {formatCurrency(pay)}
-                        </td>
-
-                        {/* Approved Paid */}
-                        <td className="px-4 py-3 font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                          {formatCurrency(paid)}
-                        </td>
-
-                        {/* Remaining */}
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span
-                            className={`font-semibold ${
-                              remaining > 0
-                                ? "text-blue-600 dark:text-blue-400"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {formatCurrency(remaining)}
-                          </span>
-                        </td>
-
-                        {/* Status */}
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <ExpenseStatusBadge status={expense.status} />
-                        </td>
-
-                        {/* Date */}
-                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-[11px]">
-                          {formatDate(expense.created_at)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Daily Expenses Monthly & Yearly Analytics Graph */}
+      <DailyExpensesChart />
     </div>
   );
 }

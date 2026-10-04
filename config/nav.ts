@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   Users,
   IndianRupee,
+  ShoppingBag,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -26,10 +27,14 @@ export const navItems: NavItem[] = [
     icon: IndianRupee,
   },
   {
+    title: "Daily Expenses",
+    href: "/daily-expenses",
+    icon: ShoppingBag,
+  },
+  {
     title: "Users",
     href: "/users",
     icon: Users,
-    adminOnly: true,
   },
   {
     title: "Settings",

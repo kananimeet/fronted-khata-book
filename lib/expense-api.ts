@@ -1,4 +1,5 @@
 import api from "./api";
+import { fetchWithDedupe } from "./api-cache";
 import { User } from "@/types/auth";
 export * from "./setting-api";
 import {
@@ -44,12 +45,23 @@ export async function payInstallment(
 
 /**
  * List expenses (User gets own; Admin gets all with optional filters).
+ * Accelerated with in-flight deduplication and memory caching.
  */
 export async function getExpenses(
-  params?: ExpenseQueryParams
+  params?: ExpenseQueryParams,
+  forceRefresh = false
 ): Promise<any> {
-  const response = await api.get("/expenses", { params });
-  return response.data?.data ?? response.data;
+  const cacheKey = `expenses-list-${JSON.stringify(params || {})}`;
+
+  return fetchWithDedupe(
+    cacheKey,
+    async () => {
+      const response = await api.get("/expenses", { params });
+      return response.data?.data ?? response.data;
+    },
+    15000,
+    forceRefresh
+  );
 }
 
 /**
@@ -62,10 +74,18 @@ export async function getExpenseById(id: string): Promise<Expense> {
 
 /**
  * Admin: Get All users with approved totals & request status (Total List API).
+ * Accelerated with in-flight deduplication and memory caching.
  */
-export async function getUserExpenseTotals(): Promise<any> {
-  const response = await api.get("/expenses/totals/users");
-  return response.data?.data ?? response.data;
+export async function getUserExpenseTotals(forceRefresh = false): Promise<any> {
+  return fetchWithDedupe(
+    "expenses-totals-users",
+    async () => {
+      const response = await api.get("/expenses/totals/users");
+      return response.data?.data ?? response.data;
+    },
+    30000,
+    forceRefresh
+  );
 }
 
 /**
@@ -112,40 +132,48 @@ export async function deleteExpense(id: string): Promise<void> {
  * Admin: Fetch users list for expense user selection dropdown.
  * Primary endpoint: GET /api/v1/users?limit=100
  * Fallback endpoint: GET /api/v1/expenses/totals/users
+ * Accelerated with 2-minute memory caching.
  */
-export async function getUsersForExpenseSelect(): Promise<User[]> {
-  try {
-    const response = await api.get("/users", { params: { limit: 100 } });
-    const rawData =
-      response.data?.data?.users ||
-      response.data?.users ||
-      response.data?.data ||
-      response.data;
+export async function getUsersForExpenseSelect(forceRefresh = false): Promise<User[]> {
+  return fetchWithDedupe(
+    "users-select-options",
+    async () => {
+      try {
+        const response = await api.get("/users", { params: { limit: 100 } });
+        const rawData =
+          response.data?.data?.users ||
+          response.data?.users ||
+          response.data?.data ||
+          response.data;
 
-    if (Array.isArray(rawData) && rawData.length > 0) {
-      return rawData;
-    }
-  } catch (err) {
-    console.warn("Could not load /users?limit=100, attempting fallback:", err);
-  }
+        if (Array.isArray(rawData) && rawData.length > 0) {
+          return rawData;
+        }
+      } catch (err) {
+        console.warn("Could not load /users?limit=100, attempting fallback:", err);
+      }
 
-  // Fallback: GET /api/v1/expenses/totals/users
-  try {
-    const totalsRes = await api.get("/expenses/totals/users");
-    const totalsData =
-      totalsRes.data?.data?.users ||
-      totalsRes.data?.users ||
-      totalsRes.data?.data ||
-      totalsRes.data;
+      // Fallback: GET /api/v1/expenses/totals/users
+      try {
+        const totalsRes = await api.get("/expenses/totals/users");
+        const totalsData =
+          totalsRes.data?.data?.users ||
+          totalsRes.data?.users ||
+          totalsRes.data?.data ||
+          totalsRes.data;
 
-    if (Array.isArray(totalsData)) {
-      return totalsData
-        .map((item: any) => item.user || item)
-        .filter(Boolean);
-    }
-  } catch (err) {
-    console.warn("Could not load /expenses/totals/users fallback:", err);
-  }
+        if (Array.isArray(totalsData)) {
+          return totalsData
+            .map((item: any) => item.user || item)
+            .filter(Boolean);
+        }
+      } catch (err) {
+        console.warn("Could not load /expenses/totals/users fallback:", err);
+      }
 
-  return [];
+      return [];
+    },
+    120000,
+    forceRefresh
+  );
 }

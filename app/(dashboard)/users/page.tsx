@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@/context/auth-context";
-import { api, getApiErrorMessage } from "@/lib/api";
+import { api, getApiErrorMessage, fetchWithDedupe } from "@/lib/api";
 import { User, UsersListResponse } from "@/types/auth";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ export default function UsersPage() {
 
   const isAdmin = currentUser?.role?.toUpperCase() === "ADMIN";
 
-  // State
+  // State (Consistent initial values for SSR & client)
   const [users, setUsers] = useState<User[]>([]);
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -45,6 +45,22 @@ export default function UsersPage() {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+
+  // Hydrate from localStorage strictly on client post-hydration to prevent SSR mismatch
+  useEffect(() => {
+    try {
+      const item = localStorage.getItem("khatabook_users_cache");
+      if (item) {
+        const cached = JSON.parse(item);
+        if (cached?.users && Array.isArray(cached.users) && cached.users.length > 0) {
+          setUsers(cached.users);
+          if (typeof cached.total === "number") setTotalUsers(cached.total);
+          if (typeof cached.totalPages === "number") setTotalPages(cached.totalPages);
+          setIsLoading(false);
+        }
+      }
+    } catch {}
+  }, []);
 
   // Dialog States
   const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
@@ -84,7 +100,14 @@ export default function UsersPage() {
           params.is_active = "false";
         }
 
-        const response = await api.get<UsersListResponse>("/users", { params });
+        const cacheKey = `users-list-${JSON.stringify(params)}`;
+        const response = await fetchWithDedupe(
+          cacheKey,
+          () => api.get<UsersListResponse>("/users", { params }),
+          15000,
+          showRefreshSpinner
+        );
+
         const data = response.data?.data;
 
         if (data) {
@@ -94,6 +117,22 @@ export default function UsersPage() {
             setCurrentPage(data.page || page);
             setTotalPages(data.totalPages || 1);
           });
+
+          // Cache first page default list
+          if (!debouncedSearch.trim() && statusFilter === "all" && page === 1) {
+            if (typeof window !== "undefined") {
+              try {
+                localStorage.setItem(
+                  "khatabook_users_cache",
+                  JSON.stringify({
+                    users: data.users,
+                    total: data.total,
+                    totalPages: data.totalPages,
+                  })
+                );
+              } catch {}
+            }
+          }
         }
       } catch (err: unknown) {
         toast.error(getApiErrorMessage(err, "Failed to load users directory"));
@@ -293,7 +332,7 @@ export default function UsersPage() {
         open={editDialogOpen}
         isAdmin={isAdmin}
         onOpenChange={setEditDialogOpen}
-        onUserUpdated={() => fetchUsers(currentPage)}
+        onUserUpdated={() => fetchUsers(currentPage, true)}
       />
 
       {/* View User Details Dialog */}
