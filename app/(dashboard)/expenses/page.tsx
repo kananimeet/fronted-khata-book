@@ -409,13 +409,13 @@ function ExpensesContent() {
             />
           </Button>
 
-          {/* New Expense Request Button */}
+          {/* Room Rent Request Button */}
           <Button
             onClick={() => setCreateDialogOpen(true)}
             className="gap-2 font-semibold shadow-xs h-9 bg-primary"
           >
             <PlusCircle className="h-4 w-4" />
-            <span>New Expense Request</span>
+            <span>Room Rent Request</span>
           </Button>
         </div>
       </div>
@@ -561,6 +561,7 @@ function ExpensesContent() {
       <ExpenseCreateDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
+        isAdmin={isAdmin}
         onExpenseCreated={() => {
           setSearchInput("");
           setDebouncedSearch("");

@@ -1,4 +1,6 @@
 import api from "./api";
+import { User } from "@/types/auth";
+export * from "./setting-api";
 import {
   Expense,
   ExpenseListResponse,
@@ -104,4 +106,46 @@ export async function updateExpense(
  */
 export async function deleteExpense(id: string): Promise<void> {
   await api.delete(`/expenses/${id}`);
+}
+
+/**
+ * Admin: Fetch users list for expense user selection dropdown.
+ * Primary endpoint: GET /api/v1/users?limit=100
+ * Fallback endpoint: GET /api/v1/expenses/totals/users
+ */
+export async function getUsersForExpenseSelect(): Promise<User[]> {
+  try {
+    const response = await api.get("/users", { params: { limit: 100 } });
+    const rawData =
+      response.data?.data?.users ||
+      response.data?.users ||
+      response.data?.data ||
+      response.data;
+
+    if (Array.isArray(rawData) && rawData.length > 0) {
+      return rawData;
+    }
+  } catch (err) {
+    console.warn("Could not load /users?limit=100, attempting fallback:", err);
+  }
+
+  // Fallback: GET /api/v1/expenses/totals/users
+  try {
+    const totalsRes = await api.get("/expenses/totals/users");
+    const totalsData =
+      totalsRes.data?.data?.users ||
+      totalsRes.data?.users ||
+      totalsRes.data?.data ||
+      totalsRes.data;
+
+    if (Array.isArray(totalsData)) {
+      return totalsData
+        .map((item: any) => item.user || item)
+        .filter(Boolean);
+    }
+  } catch (err) {
+    console.warn("Could not load /expenses/totals/users fallback:", err);
+  }
+
+  return [];
 }

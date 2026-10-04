@@ -7,6 +7,7 @@ import { BookOpen } from "lucide-react";
 
 import { navItems } from "@/config/nav";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/auth-context";
 import {
   Sheet,
   SheetContent,
@@ -21,6 +22,13 @@ interface MobileNavProps {
 
 export function MobileNav({ open, onOpenChange }: MobileNavProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const isAdmin = user?.role?.toUpperCase() === "ADMIN";
+
+  const visibleNavItems = navItems.filter((item) => {
+    if (item.adminOnly && !isAdmin) return false;
+    return true;
+  });
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -37,7 +45,7 @@ export function MobileNav({ open, onOpenChange }: MobileNavProps) {
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-1">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const isActive =
               pathname === item.href || pathname.startsWith(`${item.href}/`);

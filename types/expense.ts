@@ -116,12 +116,18 @@ export interface UserTotalsResponse {
   };
 }
 
+export * from "./setting";
+
 export interface CreateExpensePayload {
+  user_id?: string;
+  userId?: string;
   total?: number;
   total_amount?: number;
   pay?: number;
-  pay_amount?: number;
+  pay_amount: number;
   note?: string;
+  category?: string;
+  date?: string;
   expense_id?: string;
 }
 
