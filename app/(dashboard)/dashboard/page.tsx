@@ -11,9 +11,11 @@ import {
   RotateCw,
   PlusCircle,
   TrendingUp,
+  ShoppingBag,
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { getExpenses } from "@/lib/expense-api";
+import { getDailyExpenses } from "@/lib/daily-expense-api";
 import { Expense } from "@/types/expense";
 import { formatCurrency } from "@/lib/utils";
 import {
@@ -36,6 +38,8 @@ interface CachedDashboardData {
     totalPending: number;
     totalRemaining: number;
   };
+  dailySpent?: number;
+  dailyCount?: number;
   timestamp: number;
 }
 
@@ -45,6 +49,8 @@ export default function DashboardPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [pendingCount, setPendingCount] = useState<number>(0);
+  const [dailySpent, setDailySpent] = useState<number>(0);
+  const [dailyCount, setDailyCount] = useState<number>(0);
   const [summary, setSummary] = useState({
     totalRoomRate: 0,
     totalApproved: 0,
@@ -65,6 +71,8 @@ export default function DashboardPage() {
           if (cached.expenses) setExpenses(cached.expenses);
           if (typeof cached.totalCount === "number") setTotalCount(cached.totalCount);
           if (typeof cached.pendingCount === "number") setPendingCount(cached.pendingCount);
+          if (typeof cached.dailySpent === "number") setDailySpent(cached.dailySpent);
+          if (typeof cached.dailyCount === "number") setDailyCount(cached.dailyCount);
           if (cached.summary) setSummary(cached.summary);
           setIsLoading(false);
         }
@@ -77,7 +85,23 @@ export default function DashboardPage() {
     else setIsLoading(true);
 
     try {
-      const data = await getExpenses({ page: 1, limit: 10 });
+      // Parallel fetch fresh expenses and daily room expenses
+      const [data, dailyRes] = await Promise.all([
+        getExpenses({ page: 1, limit: 10 }, true),
+        getDailyExpenses({ limit: 100, forceRefresh: true }).catch(() => null),
+      ]);
+
+      let currentDailySpent = 0;
+      let currentDailyCount = 0;
+      if (dailyRes?.summary) {
+        currentDailySpent =
+          Number(dailyRes.summary.totalRoomAmount ?? dailyRes.summary.totalAmount) || 0;
+        currentDailyCount =
+          Number(dailyRes.summary.approvedCount ?? dailyRes.pagination?.total) || 0;
+        setDailySpent(currentDailySpent);
+        setDailyCount(currentDailyCount);
+      }
+
       if (data) {
         let items: Expense[] = [];
         if (Array.isArray(data)) {
@@ -187,6 +211,8 @@ export default function DashboardPage() {
               totalCount: total,
               pendingCount: pending,
               summary: newSummary,
+              dailySpent: currentDailySpent,
+              dailyCount: currentDailyCount,
               timestamp: Date.now(),
             };
             localStorage.setItem(
@@ -222,11 +248,23 @@ export default function DashboardPage() {
     {
       title: "Total Room Rate",
       value: formatCurrency(summary.totalRoomRate),
-      subtitle: `${totalCount} total expense request${totalCount === 1 ? "" : "s"}`,
+      subtitle:
+        dailySpent > 0
+          ? `Cut by ${formatCurrency(dailySpent)} groceries`
+          : `${totalCount} room contracts`,
       icon: Home,
       iconColor: "text-blue-600 dark:text-blue-400",
       bgColor: "bg-blue-500/10 border-blue-500/20",
       accent: "from-blue-500/10 to-transparent",
+    },
+    {
+      title: "Total Daily Expenses",
+      value: formatCurrency(dailySpent),
+      subtitle: `${dailyCount} approved grocery items`,
+      icon: ShoppingBag,
+      iconColor: "text-indigo-600 dark:text-indigo-400",
+      bgColor: "bg-indigo-500/10 border-indigo-500/20",
+      accent: "from-indigo-500/10 to-transparent",
     },
     {
       title: "Total Approved Paid",
@@ -301,8 +339,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 4 Stat Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* 5 Stat Cards */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (

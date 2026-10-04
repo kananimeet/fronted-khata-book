@@ -225,8 +225,8 @@ export function DailyExpenseFilters({
             </select>
           </div>
 
-          {/* Admin User Filter Dropdown */}
-          {isAdmin && (
+          {/* Member Filter Dropdown */}
+          {(users.length > 0 || isAdmin) && (
             <div className="relative flex items-center min-w-[160px]">
               <Users className="absolute left-3 top-2.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
               <select
@@ -238,10 +238,10 @@ export function DailyExpenseFilters({
                   })
                 }
                 disabled={isLoadingUsers}
-                aria-label="Filter by user"
+                aria-label="Filter by roommate"
                 className="h-9 w-full rounded-md border border-input bg-background pl-8.5 pr-8 text-xs font-medium text-foreground outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-all cursor-pointer disabled:opacity-60"
               >
-                <option value="all">All Members</option>
+                <option value="all">All Roommates</option>
                 {users.map((u) => (
                   <option key={u.id} value={String(u.id)}>
                     {u.name || u.email}

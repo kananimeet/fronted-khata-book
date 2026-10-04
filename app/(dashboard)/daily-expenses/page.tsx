@@ -124,27 +124,25 @@ export default function DailyExpensesPage() {
     return () => clearTimeout(timer);
   }, [filters.search]);
 
-  // Load Admin user list for filtering if Admin
+  // Load users list for filtering
   useEffect(() => {
-    if (isAdmin) {
-      let isMounted = true;
-      setIsLoadingUsers(true);
-      getUsersForExpenseSelect()
-        .then((fetchedUsers) => {
-          if (isMounted) setUsers(fetchedUsers);
-        })
-        .catch((err) => {
-          console.warn("Could not load users for daily expenses filter:", err);
-        })
-        .finally(() => {
-          if (isMounted) setIsLoadingUsers(false);
-        });
+    let isMounted = true;
+    setIsLoadingUsers(true);
+    getUsersForExpenseSelect()
+      .then((fetchedUsers) => {
+        if (isMounted) setUsers(fetchedUsers);
+      })
+      .catch((err) => {
+        console.warn("Could not load users for daily expenses filter:", err);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingUsers(false);
+      });
 
-      return () => {
-        isMounted = false;
-      };
-    }
-  }, [isAdmin]);
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Fetch Daily Expenses
   const fetchExpenses = useCallback(

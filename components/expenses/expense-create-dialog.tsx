@@ -50,7 +50,7 @@ export function ExpenseCreateDialog({
   const [defaultSettingAmount, setDefaultSettingAmount] = useState<number>(6000);
   const [isLoadingSetting, setIsLoadingSetting] = useState<boolean>(false);
   const [totalAmount, setTotalAmount] = useState<string>("6000");
-  const [payAmount, setPayAmount] = useState<string>("5000");
+  const [payAmount, setPayAmount] = useState<string>("0");
   const [note, setNote] = useState<string>("room pay");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -80,13 +80,8 @@ export function ExpenseCreateDialog({
           const defaultAmt = Number(setting.total_amount) || 6000;
           setDefaultSettingAmount(defaultAmt);
           setTotalAmount(String(defaultAmt));
-          setPayAmount((prev) => {
-            const num = Number(prev);
-            if (!num || num === 5000 || num === 6000 || num > defaultAmt) {
-              return String(Math.min(5000, defaultAmt));
-            }
-            return prev;
-          });
+          // Payable amount always defaults to 0 as required
+          setPayAmount("0");
         }
       } catch (err) {
         console.warn("Could not load setting, using 6000 fallback:", err);
@@ -126,12 +121,14 @@ export function ExpenseCreateDialog({
 
   // Reset form when dialog opens/closes
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      setPayAmount("0");
+    } else {
       setSelectedUserId("");
       setSelectedUserObj(null);
       setUserSelectError(null);
       setTotalAmount(String(defaultSettingAmount));
-      setPayAmount(String(Math.min(5000, defaultSettingAmount)));
+      setPayAmount("0");
       setNote("room pay");
     }
   }, [open, defaultSettingAmount]);

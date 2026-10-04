@@ -65,12 +65,31 @@ api.interceptors.response.use(
       const url = response.config?.url || "";
       if (url.includes("/daily-expenses")) {
         invalidateCache("daily-expenses");
+        invalidateCache("expenses");
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.removeItem("khatabook_daily_expenses_cache");
+            localStorage.removeItem("khatabook_dashboard_cache");
+            localStorage.removeItem("khatabook_room_expenses_cache");
+          } catch {}
+        }
       }
       if (url.includes("/expenses")) {
         invalidateCache("expenses");
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.removeItem("khatabook_dashboard_cache");
+            localStorage.removeItem("khatabook_room_expenses_cache");
+          } catch {}
+        }
       }
       if (url.includes("/users")) {
         invalidateCache("users");
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.removeItem("khatabook_users_cache");
+          } catch {}
+        }
       }
       if (url.includes("/settings")) {
         invalidateCache("settings");

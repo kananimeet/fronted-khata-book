@@ -37,6 +37,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = (newToken: string, newUser: User, redirectPath = "/dashboard") => {
+    // Clear any previous session caches
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("khatabook_daily_expenses_cache");
+        localStorage.removeItem("khatabook_dashboard_cache");
+        localStorage.removeItem("khatabook_room_expenses_cache");
+        localStorage.removeItem("khatabook_users_cache");
+      } catch {}
+    }
     setToken(newToken);
     setStoredUser(newUser);
     setTokenState(newToken);
@@ -46,6 +55,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("khatabook_daily_expenses_cache");
+        localStorage.removeItem("khatabook_dashboard_cache");
+        localStorage.removeItem("khatabook_room_expenses_cache");
+        localStorage.removeItem("khatabook_users_cache");
+      } catch {}
+    }
     clearAuthData();
     setTokenState(null);
     setUser(null);
