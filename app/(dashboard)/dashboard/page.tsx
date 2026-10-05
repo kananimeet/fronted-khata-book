@@ -201,6 +201,14 @@ export default function DashboardPage() {
           };
         }
 
+        // User formula: Total Approved Paid - Total Daily Expenses = Total Room Rate
+        if (newSummary.totalApproved > 0 || currentDailySpent > 0) {
+          newSummary.totalRoomRate = Math.max(
+            0,
+            newSummary.totalApproved - currentDailySpent
+          );
+        }
+
         setSummary(newSummary);
 
         // Cache latest data into localStorage for instant 0ms reload on refresh
@@ -236,18 +244,24 @@ export default function DashboardPage() {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
+  // User's formula: Total Approved Paid - Total Daily Expenses = Total Room Rate
+  const netRoomRate =
+    summary.totalApproved > 0 || dailySpent > 0
+      ? Math.max(0, summary.totalApproved - dailySpent)
+      : summary.totalRoomRate;
+
+  const totalTarget = summary.totalApproved + summary.totalRemaining;
   const collectionRate =
-    summary.totalRoomRate > 0
-      ? Math.min(
-          100,
-          Math.round((summary.totalApproved / summary.totalRoomRate) * 100)
-        )
+    totalTarget > 0
+      ? Math.min(100, Math.round((summary.totalApproved / totalTarget) * 100))
+      : summary.totalApproved > 0
+      ? 100
       : 0;
 
   const statCards = [
     {
       title: "Total Room Rate",
-      value: formatCurrency(summary.totalRoomRate),
+      value: formatCurrency(netRoomRate),
       subtitle:
         dailySpent > 0
           ? `Cut by ${formatCurrency(dailySpent)} groceries`

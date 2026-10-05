@@ -18,17 +18,24 @@ import {
 interface DailyExpenseStatsProps {
   summary?: DailyExpenseSummary;
   isLoading?: boolean;
+  totalApprovedPaid?: number;
 }
 
 export function DailyExpenseStats({
   summary,
   isLoading = false,
+  totalApprovedPaid,
 }: DailyExpenseStatsProps) {
   const totalAmount = summary?.totalAmount ?? 0;
   const totalRoomAmount = summary?.totalRoomAmount ?? 0;
   const totalOwnAmount = summary?.totalOwnAmount ?? 0;
   const pendingCount = summary?.pendingCount ?? 0;
   const approvedCount = summary?.approvedCount ?? 0;
+
+  const remainingRoomFund =
+    totalApprovedPaid !== undefined && totalApprovedPaid > 0
+      ? Math.max(0, totalApprovedPaid - totalRoomAmount)
+      : null;
 
   const stats = [
     {
@@ -44,7 +51,10 @@ export function DailyExpenseStats({
     {
       title: "Room Expenses",
       value: formatCurrency(totalRoomAmount),
-      subtitle: "Credited towards room rent",
+      subtitle:
+        remainingRoomFund !== null
+          ? `${formatCurrency(remainingRoomFund)} pool balance remaining`
+          : "Credited towards room rent",
       icon: Home,
       gradient: "from-indigo-600/15 via-indigo-500/5 to-transparent",
       iconBg: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20",

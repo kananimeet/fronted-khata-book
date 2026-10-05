@@ -12,7 +12,7 @@ import {
 } from "@/types/daily-expense";
 import { User } from "@/types/auth";
 import { getDailyExpenses } from "@/lib/daily-expense-api";
-import { getUsersForExpenseSelect } from "@/lib/expense-api";
+import { getExpenses, getUsersForExpenseSelect } from "@/lib/expense-api";
 import { getApiErrorMessage } from "@/lib/api";
 
 import { DailyExpenseStats } from "@/components/daily-expenses/daily-expense-stats";
@@ -81,6 +81,7 @@ export default function DailyExpensesPage() {
   // Admin users list for dropdown
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(false);
+  const [totalApprovedPaid, setTotalApprovedPaid] = useState<number>(0);
 
   // Hydrate from localStorage strictly on client post-hydration to prevent SSR mismatch
   useEffect(() => {
@@ -124,7 +125,7 @@ export default function DailyExpensesPage() {
     return () => clearTimeout(timer);
   }, [filters.search]);
 
-  // Load users list for filtering
+  // Load users list for filtering and room expenses pool
   useEffect(() => {
     let isMounted = true;
     setIsLoadingUsers(true);
@@ -138,6 +139,15 @@ export default function DailyExpensesPage() {
       .finally(() => {
         if (isMounted) setIsLoadingUsers(false);
       });
+
+    getExpenses({ page: 1, limit: 1 })
+      .then((data) => {
+        if (!isMounted || !data) return;
+        const approved =
+          Number(data.summary?.totalApproved ?? data.summary?.totalApprovedAmount) || 0;
+        if (approved > 0) setTotalApprovedPaid(approved);
+      })
+      .catch(() => {});
 
     return () => {
       isMounted = false;
@@ -344,7 +354,11 @@ export default function DailyExpensesPage() {
       </div>
 
       {/* 2. Top 4 Stat Summary Cards */}
-      <DailyExpenseStats summary={summary} isLoading={isLoading} />
+      <DailyExpenseStats
+        summary={summary}
+        isLoading={isLoading}
+        totalApprovedPaid={totalApprovedPaid}
+      />
 
       {/* 3. Quick Tabs & Detailed Filter Controls */}
       <DailyExpenseFilters
