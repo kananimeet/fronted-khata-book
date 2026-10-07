@@ -8,6 +8,7 @@ import { navItems } from "@/config/nav";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserNav } from "@/components/dashboard/user-nav";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 interface HeaderProps {
   isSidebarCollapsed: boolean;
@@ -65,8 +66,9 @@ export function Header({
         </h1>
       </div>
 
-      {/* Right controls: Theme toggle & User Menu */}
-      <div className="flex items-center gap-3">
+      {/* Right controls: Notifications, Theme toggle & User Menu */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        <NotificationBell />
         <ThemeToggle />
         <UserNav />
       </div>

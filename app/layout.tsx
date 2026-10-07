@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/auth-context";
 import { ToastProvider } from "@/components/ui/toast";
+import { NotificationProvider } from "@/context/notification-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +17,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KhataBook Admin",
-  description: "Modern Admin Portal for KhataBook",
+  title: "KhataBook - Room & Expense Management",
+  description: "Modern Room Rate and Daily Expense Management Portal for KhataBook",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/icons/icon-192x192.png",
+    shortcut: "/icons/icon-192x192.png",
+    apple: "/icons/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "KhataBook",
+  },
+};
+
+export const viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#2563eb" },
+    { media: "(prefers-color-scheme: dark)", color: "#090d16" },
+  ],
 };
 
 export default function RootLayout({
@@ -39,7 +58,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ToastProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <NotificationProvider>{children}</NotificationProvider>
+            </AuthProvider>
           </ToastProvider>
         </ThemeProvider>
       </body>

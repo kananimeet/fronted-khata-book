@@ -93,11 +93,35 @@ export default function DashboardPage() {
 
       let currentDailySpent = 0;
       let currentDailyCount = 0;
-      if (dailyRes?.summary) {
-        currentDailySpent =
-          Number(dailyRes.summary.totalRoomAmount ?? dailyRes.summary.totalAmount) || 0;
-        currentDailyCount =
-          Number(dailyRes.summary.approvedCount ?? dailyRes.pagination?.total) || 0;
+      if (dailyRes) {
+        const rawRes = dailyRes as any;
+        const dailyItems: any[] = Array.isArray(rawRes?.items)
+          ? rawRes.items
+          : Array.isArray(rawRes?.data)
+          ? rawRes.data
+          : Array.isArray(rawRes)
+          ? rawRes
+          : [];
+
+        if (dailyItems.length > 0) {
+          const approvedRoomItems = dailyItems.filter(
+            (i: any) =>
+              (i.expense_type === "room" || i.category === "room") &&
+              i.status === "APPROVED"
+          );
+          currentDailySpent = approvedRoomItems.reduce(
+            (sum: number, i: any) => sum + (Number(i.amount) || 0),
+            0
+          );
+          currentDailyCount = approvedRoomItems.length;
+        } else if (dailyRes.summary) {
+          currentDailySpent =
+            Number(
+              dailyRes.summary.approvedRoomAmount ??
+              dailyRes.summary.totalRoomAmount
+            ) || 0;
+          currentDailyCount = Number(dailyRes.summary.approvedCount) || 0;
+        }
         setDailySpent(currentDailySpent);
         setDailyCount(currentDailyCount);
       }
@@ -180,7 +204,10 @@ export default function DashboardPage() {
           let pend = 0;
           let rem = 0;
           items.forEach((item) => {
-            roomRate += Number(item.total_amount) || 0;
+            if (item.status === "COMPLETE" || item.status === "REMAINING") {
+              roomRate += Number(item.total_amount) || 0;
+              rem += Number(item.remaining_amount) || 0;
+            }
             approved += Number(item.paid_amount) || 0;
             if (item.status === "PENDING") {
               pend += Number(item.pay_amount) || 0;
@@ -190,7 +217,6 @@ export default function DashboardPage() {
                 pend += Number(pendingP.amount) || 0;
               }
             }
-            rem += Number(item.remaining_amount) || 0;
           });
 
           newSummary = {
@@ -242,6 +268,17 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchDashboardData();
+
+    // Auto-refresh whenever an expense or payment is approved/rejected/modified
+    const handleDataUpdated = () => {
+      fetchDashboardData(true);
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("khatabook_data_updated", handleDataUpdated);
+      return () => {
+        window.removeEventListener("khatabook_data_updated", handleDataUpdated);
+      };
+    }
   }, [fetchDashboardData]);
 
   // User's formula: Total Approved Paid - Total Daily Expenses = Total Room Rate

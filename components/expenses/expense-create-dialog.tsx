@@ -153,12 +153,14 @@ export function ExpenseCreateDialog({
 
     // 2. Amount validations
     if (!numTotal || numTotal <= 0) {
-      toast.error("Please enter a valid total room rent amount.");
+      toast.error("Fix room rent amount must be greater than 0.");
       return;
     }
 
-    if (numPay < 0) {
-      toast.error("Payment amount cannot be negative.");
+    if (!payAmount.trim() || numPay <= 0) {
+      toast.error(
+        "Payment amount cannot be 0. Please enter an amount greater than 0."
+      );
       return;
     }
 
@@ -327,6 +329,13 @@ export function ExpenseCreateDialog({
                 <Info className="h-3 w-3 shrink-0" />
                 <span>Standard room rent amount configured in system settings.</span>
               </p>
+
+              {numTotal <= 0 && (
+                <p className="flex items-center gap-1 text-xs text-destructive mt-1 font-medium">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  Fix room rent amount is 0. Please configure a valid room rent in Settings.
+                </p>
+              )}
             </div>
 
             {/* Payable Amount Field */}
@@ -352,7 +361,7 @@ export function ExpenseCreateDialog({
                 <Input
                   id="pay_amount"
                   type="number"
-                  min="0"
+                  min="1"
                   max={numTotal || undefined}
                   step="any"
                   required
@@ -360,12 +369,19 @@ export function ExpenseCreateDialog({
                   value={payAmount}
                   onChange={(e) => setPayAmount(e.target.value)}
                   className={`pl-7 text-sm font-semibold ${
-                    isOverPay
+                    isOverPay || (payAmount !== "" && numPay <= 0)
                       ? "border-destructive focus-visible:ring-destructive"
                       : ""
                   }`}
                 />
               </div>
+
+              {payAmount !== "" && numPay <= 0 && (
+                <p className="flex items-center gap-1 text-xs text-destructive mt-1 font-medium">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  Payment amount must be greater than 0 (cannot submit ₹0 amount).
+                </p>
+              )}
 
               {isOverPay && (
                 <p className="flex items-center gap-1 text-xs text-destructive mt-1 font-medium">
@@ -447,7 +463,13 @@ export function ExpenseCreateDialog({
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting || isOverPay || numTotal <= 0}
+              disabled={
+                isSubmitting ||
+                isOverPay ||
+                numTotal <= 0 ||
+                numPay <= 0 ||
+                !payAmount.trim()
+              }
               className="gap-2 font-semibold shadow-xs"
             >
               {isSubmitting ? (

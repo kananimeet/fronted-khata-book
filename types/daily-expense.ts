@@ -43,6 +43,7 @@ export interface DailyExpensePagination {
 export interface DailyExpenseSummary {
   totalAmount: number;
   totalRoomAmount: number;
+  approvedRoomAmount?: number;
   totalOwnAmount: number;
   pendingCount: number;
   approvedCount: number;

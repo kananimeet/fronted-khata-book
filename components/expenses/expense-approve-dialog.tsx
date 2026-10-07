@@ -41,7 +41,8 @@ export function ExpenseApproveDialog({
 
   const total = Number(expense.total_amount) || 0;
   const currentPaid = Number(expense.paid_amount) || 0;
-  const pay = Number(expense.pay_amount) || 0;
+  const pendingPayment = expense.payments?.find((p) => p.status === "PENDING");
+  const pay = pendingPayment ? Number(pendingPayment.amount) : Number(expense.pay_amount) || 0;
   const projectedPaid = currentPaid + pay;
   const projectedRemaining = Math.max(0, total - projectedPaid);
   const nextStatus = projectedRemaining === 0 ? "COMPLETE" : "REMAINING";

@@ -1,5 +1,5 @@
 import api from "./api";
-import { fetchWithDedupe } from "./api-cache";
+import { fetchWithDedupe, clearMutationCaches } from "./api-cache";
 import { User } from "@/types/auth";
 export * from "./setting-api";
 import {
@@ -29,6 +29,7 @@ export async function createExpense(
   payload: CreateExpensePayload
 ): Promise<Expense> {
   const response = await api.post("/expenses", payload);
+  clearMutationCaches();
   return response.data?.data ?? response.data;
 }
 
@@ -40,6 +41,7 @@ export async function payInstallment(
   payload: PayInstallmentPayload
 ): Promise<Expense> {
   const response = await api.post(`/expenses/${expenseId}/pay`, payload);
+  clearMutationCaches();
   return response.data?.data ?? response.data;
 }
 
@@ -96,6 +98,7 @@ export async function approveExpense(
   payload?: ApproveExpensePayload
 ): Promise<Expense> {
   const response = await api.patch(`/expenses/${id}/approve`, payload || {});
+  clearMutationCaches();
   return response.data?.data ?? response.data;
 }
 
@@ -107,6 +110,7 @@ export async function rejectExpense(
   payload?: RejectExpensePayload
 ): Promise<Expense> {
   const response = await api.patch(`/expenses/${id}/reject`, payload || {});
+  clearMutationCaches();
   return response.data?.data ?? response.data;
 }
 
@@ -118,6 +122,7 @@ export async function updateExpense(
   payload: EditExpensePayload
 ): Promise<Expense> {
   const response = await api.patch(`/expenses/${id}`, payload);
+  clearMutationCaches();
   return response.data?.data ?? response.data;
 }
 
@@ -126,6 +131,7 @@ export async function updateExpense(
  */
 export async function deleteExpense(id: string): Promise<void> {
   await api.delete(`/expenses/${id}`);
+  clearMutationCaches();
 }
 
 /**

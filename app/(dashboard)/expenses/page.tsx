@@ -141,7 +141,11 @@ function ExpensesContent() {
     let remaining = 0;
 
     items.forEach((item) => {
-      roomRate += Number(item.total_amount) || 0;
+      // Room Rate and Remaining should only count approved/active requests (COMPLETE or REMAINING)
+      if (item.status === "COMPLETE" || item.status === "REMAINING") {
+        roomRate += Number(item.total_amount) || 0;
+        remaining += Number(item.remaining_amount) || 0;
+      }
       approved += Number(item.paid_amount) || 0;
       if (item.status === "PENDING") {
         pending += Number(item.pay_amount) || 0;
@@ -151,7 +155,6 @@ function ExpensesContent() {
           pending += Number(pendingP.amount) || 0;
         }
       }
-      remaining += Number(item.remaining_amount) || 0;
     });
 
     const summary = {
@@ -312,26 +315,29 @@ function ExpensesContent() {
   );
 
   // Fetch User Totals (Admin View)
-  const fetchUserTotals = useCallback(async () => {
-    if (!isAdmin) return;
-    setIsLoadingTotals(true);
+  const fetchUserTotals = useCallback(
+    async (force = false) => {
+      if (!isAdmin) return;
+      setIsLoadingTotals(true);
 
-    try {
-      const data = await getUserExpenseTotals();
-      if (data) {
-        const usersList =
-          data.users ||
-          data.items ||
-          (Array.isArray(data) ? data : []);
-        setUserTotals(usersList);
-        setGrandSummary(data.grandSummary || null);
+      try {
+        const data = await getUserExpenseTotals(force);
+        if (data) {
+          const usersList =
+            data.users ||
+            data.items ||
+            (Array.isArray(data) ? data : []);
+          setUserTotals(usersList);
+          setGrandSummary(data.grandSummary || null);
+        }
+      } catch (err: unknown) {
+        toast.error(getApiErrorMessage(err, "Failed to load user totals dashboard."));
+      } finally {
+        setIsLoadingTotals(false);
       }
-    } catch (err: unknown) {
-      toast.error(getApiErrorMessage(err, "Failed to load user totals dashboard."));
-    } finally {
-      setIsLoadingTotals(false);
-    }
-  }, [isAdmin, toast]);
+    },
+    [isAdmin, toast]
+  );
 
   // Initial and reactive data fetching
   useEffect(() => {
@@ -645,7 +651,7 @@ function ExpensesContent() {
           onOpenChange={setApproveDialogOpen}
           onApproved={() => {
             fetchExpensesList(currentPage, true);
-            fetchUserTotals();
+            fetchUserTotals(true);
           }}
         />
       )}
@@ -658,7 +664,7 @@ function ExpensesContent() {
           onOpenChange={setRejectDialogOpen}
           onRejected={() => {
             fetchExpensesList(currentPage, true);
-            fetchUserTotals();
+            fetchUserTotals(true);
           }}
         />
       )}
@@ -671,7 +677,7 @@ function ExpensesContent() {
           onOpenChange={setEditDialogOpen}
           onUpdated={() => {
             fetchExpensesList(currentPage, true);
-            fetchUserTotals();
+            fetchUserTotals(true);
           }}
         />
       )}
@@ -684,7 +690,7 @@ function ExpensesContent() {
           onOpenChange={setDeleteDialogOpen}
           onDeleted={() => {
             fetchExpensesList(currentPage, true);
-            fetchUserTotals();
+            fetchUserTotals(true);
           }}
         />
       )}

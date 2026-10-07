@@ -1,5 +1,5 @@
 import { api, getProfilePictureUrl } from "./api";
-import { fetchWithDedupe } from "./api-cache";
+import { fetchWithDedupe, clearMutationCaches } from "./api-cache";
 import {
   DailyExpense,
   DailyExpenseFilterParams,
@@ -72,12 +72,17 @@ export async function getDailyExpenses(
 
       // Safely extract summary
       const summary = raw.summary || {
-        totalAmount: items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0),
+        totalAmount: items
+          .filter((i) => i.status === "APPROVED")
+          .reduce((sum, item) => sum + (Number(item.amount) || 0), 0),
         totalRoomAmount: items
-          .filter((i) => i.expense_type === "room")
+          .filter((i) => i.expense_type === "room" && i.status === "APPROVED")
+          .reduce((sum, item) => sum + (Number(item.amount) || 0), 0),
+        approvedRoomAmount: items
+          .filter((i) => i.expense_type === "room" && i.status === "APPROVED")
           .reduce((sum, item) => sum + (Number(item.amount) || 0), 0),
         totalOwnAmount: items
-          .filter((i) => i.expense_type === "own")
+          .filter((i) => i.expense_type === "own" && i.status === "APPROVED")
           .reduce((sum, item) => sum + (Number(item.amount) || 0), 0),
         pendingCount: items.filter((i) => i.status === "PENDING").length,
         approvedCount: items.filter((i) => i.status === "APPROVED").length,
@@ -117,6 +122,7 @@ export async function createDailyExpense(
   }
 
   const response = await api.post("/daily-expenses", formData);
+  clearMutationCaches();
   return response.data?.data || response.data;
 }
 
@@ -149,6 +155,7 @@ export async function updateDailyExpense(
   }
 
   const response = await api.patch(`/daily-expenses/${id}`, formData);
+  clearMutationCaches();
   return response.data?.data || response.data;
 }
 
@@ -162,6 +169,7 @@ export async function approveDailyExpense(
   const response = await api.patch(`/daily-expenses/${id}/approve`, {
     admin_note: admin_note?.trim() || undefined,
   });
+  clearMutationCaches();
   return response.data?.data || response.data;
 }
 
@@ -175,6 +183,7 @@ export async function rejectDailyExpense(
   const response = await api.patch(`/daily-expenses/${id}/reject`, {
     admin_note: admin_note?.trim() || undefined,
   });
+  clearMutationCaches();
   return response.data?.data || response.data;
 }
 
@@ -183,6 +192,7 @@ export async function rejectDailyExpense(
  */
 export async function deleteDailyExpense(id: string | number): Promise<void> {
   await api.delete(`/daily-expenses/${id}`);
+  clearMutationCaches();
 }
 
 const DAY_OF_WEEK_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

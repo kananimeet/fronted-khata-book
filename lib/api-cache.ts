@@ -62,6 +62,24 @@ export function invalidateCache(pattern?: string | RegExp): void {
 }
 
 /**
+ * Clears all in-memory API caches, invalidates localStorage snapshot keys,
+ * and broadcasts an event so active views re-fetch fresh live data immediately.
+ */
+export function clearMutationCaches(): void {
+  invalidateCache();
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.removeItem("khatabook_dashboard_cache");
+      localStorage.removeItem("khatabook_room_expenses_cache");
+      localStorage.removeItem("khatabook_daily_expenses_cache");
+      window.dispatchEvent(new Event("khatabook_data_updated"));
+    } catch {
+      // Ignore storage errors
+    }
+  }
+}
+
+/**
  * Fetches data with in-flight deduplication and TTL memory caching.
  */
 export async function fetchWithDedupe<T = unknown>(

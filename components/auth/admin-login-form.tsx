@@ -69,11 +69,17 @@ export function AdminLoginForm() {
     setIsLoading(true);
 
     try {
+      const storedFcmToken =
+        typeof window !== "undefined"
+          ? localStorage.getItem("khatabook_fcm_token")
+          : null;
+
       const response = await api.post<LoginResponse>(
         "/auth/admin/login",
         {
           email: data.email.trim().toLowerCase(),
           password: data.password,
+          ...(storedFcmToken ? { fcm_token: storedFcmToken } : {}),
         }
       );
 
