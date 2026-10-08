@@ -45,15 +45,18 @@ export async function saveFcmToken(fcmToken: string): Promise<boolean> {
   if (!fcmToken || typeof fcmToken !== "string") return false;
 
   try {
-    await api.post("/notifications/fcm-token", { fcm_token: fcmToken });
+    const res = await api.post("/notifications/fcm-token", { fcm_token: fcmToken });
+    console.log("[saveFcmToken] Token synced via /notifications/fcm-token:", res.data?.message);
     return true;
   } catch (err) {
+    console.warn("[saveFcmToken] /notifications/fcm-token failed, trying /users/fcm-token:", getApiErrorMessage(err));
     // Try fallback endpoint
     try {
-      await api.patch("/users/fcm-token", { fcm_token: fcmToken });
+      const fallbackRes = await api.patch("/users/fcm-token", { fcm_token: fcmToken });
+      console.log("[saveFcmToken] Token synced via fallback /users/fcm-token:", fallbackRes.data?.message);
       return true;
     } catch (fallbackErr) {
-      console.warn("Could not sync FCM token to backend:", getApiErrorMessage(fallbackErr));
+      console.error("[saveFcmToken] Could not sync FCM token to backend:", getApiErrorMessage(fallbackErr));
       return false;
     }
   }

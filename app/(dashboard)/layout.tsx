@@ -6,6 +6,8 @@ import { Header } from "@/components/dashboard/header";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { cn } from "@/lib/utils";
 
+import { NotificationPermissionBanner } from "@/components/dashboard/notification-permission-banner";
+
 export default function DashboardLayout({
   children,
 }: {
@@ -40,6 +42,9 @@ export default function DashboardLayout({
           onToggleSidebarCollapse={() => setIsCollapsed(!isCollapsed)}
           onOpenMobileNav={() => setMobileNavOpen(true)}
         />
+
+        {/* Push Notification Permission Request Banner */}
+        <NotificationPermissionBanner />
 
         {/* Independently Scrollable Main Content Area */}
         <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto bg-muted/20">

@@ -129,8 +129,17 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     refreshNotifications();
 
     // Auto-sync token if notification permission is already granted
-    if (typeof window !== "undefined" && "Notification" in window) {
-      if (Notification.permission === "granted" && !hasSyncedRef.current) {
+    if (typeof window !== "undefined") {
+      // If we already have a cached token in localStorage, sync it immediately to DB
+      try {
+        const storedToken = localStorage.getItem("khatabook_fcm_token");
+        if (storedToken) {
+          setFcmToken(storedToken);
+          saveFcmToken(storedToken).catch(() => {});
+        }
+      } catch {}
+
+      if ("Notification" in window && Notification.permission === "granted" && !hasSyncedRef.current) {
         hasSyncedRef.current = true;
         requestFcmToken().then(async (token) => {
           if (token) {

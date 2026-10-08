@@ -8,21 +8,31 @@ import {
   MessagePayload,
 } from "firebase/messaging";
 
-// Firebase client configuration
+// Firebase client configuration with production fallbacks
 export const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
+  apiKey:
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
+    "AIzaSyOGtkmM7cdF5K8bwmX0wFyzBdcszg4ktHQ",
   authDomain:
-    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "khatabook-d0342.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "khatabook-d0342",
+    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
+    "khatabook-d0342.firebaseapp.com",
+  projectId:
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+    "khatabook-d0342",
   storageBucket:
-    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "khatabook-d0342.appspot.com",
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+    "khatabook-d0342.firebasestorage.app",
   messagingSenderId:
-    process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "1035354530779",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
+    process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||
+    "264149666504",
+  appId:
+    process.env.NEXT_PUBLIC_FIREBASE_APP_ID ||
+    "1:264149666504:web:abe63be93e3ca3e9d0f3fd",
 };
 
 export const FIREBASE_VAPID_KEY =
-  process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || undefined;
+  process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY ||
+  "BKeOKRVj-G4MzbKYIkwwXGFlknL_RjBbccu8ZDtbUp8ELZjxt-9iKL4sztaFXLSw2xT1gO0jZNDQLTIgH753EN0";
 
 /**
  * Initializes and returns the Firebase app singleton.
@@ -43,13 +53,13 @@ export async function getFirebaseMessaging(): Promise<Messaging | null> {
   try {
     const supported = await isSupported();
     if (!supported) {
-      console.warn("Firebase Messaging is not supported in this browser environment.");
+      console.warn("[Firebase] Firebase Messaging is not supported in this browser.");
       return null;
     }
     const app = getFirebaseApp();
     return getMessaging(app);
   } catch (error) {
-    console.warn("Failed to initialize Firebase Messaging:", error);
+    console.warn("[Firebase] Failed to initialize Firebase Messaging:", error);
     return null;
   }
 }
@@ -62,12 +72,12 @@ export async function requestFcmToken(): Promise<string | null> {
   if (typeof window === "undefined") return null;
 
   if (!("Notification" in window)) {
-    console.warn("This browser does not support desktop notifications.");
+    console.warn("[Firebase] This browser does not support desktop notifications.");
     return null;
   }
 
   if (!("serviceWorker" in navigator)) {
-    console.warn("This browser does not support Service Workers.");
+    console.warn("[Firebase] This browser does not support Service Workers.");
     return null;
   }
 
@@ -79,28 +89,25 @@ export async function requestFcmToken(): Promise<string | null> {
     }
 
     if (permission !== "granted") {
-      console.log("Notification permission was not granted:", permission);
+      console.log("[Firebase] Notification permission was not granted:", permission);
       return null;
     }
 
     const messaging = await getFirebaseMessaging();
-    if (!messaging) return null;
+    if (!messaging) {
+      console.warn("[Firebase] Messaging instance unavailable.");
+      return null;
+    }
 
-    // Register service worker with configuration query parameters for reliability
-    const swParams = new URLSearchParams({
-      apiKey: firebaseConfig.apiKey || "",
-      appId: firebaseConfig.appId || "",
-      projectId: firebaseConfig.projectId || "",
-      messagingSenderId: firebaseConfig.messagingSenderId || "",
-      authDomain: firebaseConfig.authDomain || "",
-      storageBucket: firebaseConfig.storageBucket || "",
-    });
-
-    const swUrl = `/firebase-messaging-sw.js?${swParams.toString()}`;
-
-    const registration = await navigator.serviceWorker.register(swUrl, {
+    // Register / update service worker
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js", {
       scope: "/",
     });
+
+    // Request immediate check for service worker update
+    try {
+      await registration.update();
+    } catch {}
 
     await navigator.serviceWorker.ready;
 
@@ -116,14 +123,14 @@ export async function requestFcmToken(): Promise<string | null> {
     const currentToken = await getToken(messaging, tokenOptions);
 
     if (currentToken) {
-      console.log("FCM Registration Token received successfully");
+      console.log("[Firebase] FCM Registration Token generated successfully:", currentToken.slice(0, 15) + "...");
       return currentToken;
     } else {
-      console.warn("No registration token available. Request permission to generate one.");
+      console.warn("[Firebase] No registration token returned. Permission might be required.");
       return null;
     }
   } catch (error) {
-    console.error("An error occurred while retrieving FCM token:", error);
+    console.error("[Firebase] An error occurred while retrieving FCM token:", error);
     return null;
   }
 }
