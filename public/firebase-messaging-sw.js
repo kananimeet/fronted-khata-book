@@ -16,9 +16,9 @@ self.addEventListener('activate', (event) => {
 const urlParams = new URLSearchParams(self.location.search);
 
 const firebaseConfig = {
-  apiKey:
-    urlParams.get('apiKey') ||
-    'AIzaSyOGtkmM7cdF5K8bwmX0wFyzBdcszg4ktHQ',
+  // Isko replace kijiye:
+  apiKey: urlParams.get('apiKey') || 'AIzaSyDGtkmH7ccP5K8bwmsBwfyzBdcrsg6XthQ',
+
   authDomain:
     urlParams.get('authDomain') ||
     'khatabook-d0342.firebaseapp.com',
