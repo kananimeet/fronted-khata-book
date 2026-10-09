@@ -400,20 +400,20 @@ function ExpensesContent() {
       {/* Page Title & Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-xs ring-1 ring-primary/20">
-              <IndianRupee className="h-5 w-5" />
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 ring-2 ring-white/50 dark:ring-white/10 shrink-0">
+              <IndianRupee className="h-6 w-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                   {isAdmin
                     ? "Room Rate & Expense Management"
                     : "My Room Rent & Expenses"}
                 </h1>
                 <Badge
                   variant={isAdmin ? "default" : "secondary"}
-                  className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5"
+                  className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
                 >
                   {isAdmin ? (
                     <span className="flex items-center gap-1">
@@ -426,7 +426,7 @@ function ExpensesContent() {
                   )}
                 </Badge>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 font-medium">
                 {isAdmin
                   ? "Track user room expenses, approve installment payments, and view real-time totals."
                   : "Submit room rent requests, pay remaining balances, and view your payment history."}
@@ -435,7 +435,7 @@ function ExpensesContent() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
           <Button
             variant="outline"
             size="icon"
@@ -445,10 +445,10 @@ function ExpensesContent() {
             }}
             disabled={isLoading || isRefreshing || isLoadingTotals}
             title="Refresh data"
-            className="h-9 w-9"
+            className="h-10 w-10 rounded-xl glass-pill shadow-xs hover:border-violet-500/40"
           >
             <RotateCw
-              className={`h-4 w-4 ${isRefreshing || isLoadingTotals ? "animate-spin text-primary" : ""
+              className={`h-4 w-4 ${isRefreshing || isLoadingTotals ? "animate-spin text-violet-600" : "text-muted-foreground hover:text-foreground"
                 }`}
             />
           </Button>
@@ -456,9 +456,9 @@ function ExpensesContent() {
           {/* Room Rent Request Button */}
           <Button
             onClick={() => setCreateDialogOpen(true)}
-            className="gap-2 font-semibold shadow-xs h-9 bg-primary"
+            className="h-10 px-4 rounded-xl gap-2 font-bold shadow-lg shadow-violet-500/25 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
-            <PlusCircle className="h-4 w-4" />
+            <PlusCircle className="h-4 w-4 shrink-0" />
             <span>Room Rent Request</span>
           </Button>
         </div>
@@ -466,13 +466,13 @@ function ExpensesContent() {
 
       {/* Admin Tab Switcher: "All Requests" vs "User Totals Dashboard" */}
       {isAdmin && (
-        <div className="flex items-center gap-2 border-b border-border pb-2">
+        <div className="inline-flex p-1 rounded-2xl glass-pill border border-white/60 dark:border-white/10 shadow-xs">
           <button
             type="button"
             onClick={() => handleTabChange("requests")}
-            className={`flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all ${activeTab === "requests"
-                ? "bg-primary text-primary-foreground shadow-xs"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${activeTab === "requests"
+                ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25"
+                : "text-muted-foreground hover:text-foreground"
               }`}
           >
             <LayoutList className="h-4 w-4" />
@@ -482,9 +482,9 @@ function ExpensesContent() {
           <button
             type="button"
             onClick={() => handleTabChange("totals")}
-            className={`flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all ${activeTab === "totals"
-                ? "bg-primary text-primary-foreground shadow-xs"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${activeTab === "totals"
+                ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25"
+                : "text-muted-foreground hover:text-foreground"
               }`}
           >
             <Users className="h-4 w-4" />
@@ -506,7 +506,7 @@ function ExpensesContent() {
           />
 
           {/* Filter & Search Bar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-border bg-card shadow-xs">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl glass-card shadow-lg border border-white/60 dark:border-white/10">
             {/* Search Input */}
             <div className="relative flex-1">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -514,7 +514,7 @@ function ExpensesContent() {
                 placeholder="Search by user, note, or remarks..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-9 pr-8 bg-background"
+                className="pl-9 pr-8 bg-white/60 dark:bg-slate-900/60 rounded-xl border-border/60"
               />
               {searchInput && (
                 <button

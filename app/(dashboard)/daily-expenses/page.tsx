@@ -293,18 +293,18 @@ export default function DailyExpensesPage() {
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* 1. Header & Page Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-xs ring-1 ring-primary/20">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 ring-2 ring-white/50 dark:ring-white/10 shrink-0">
             <ShoppingBag className="h-6 w-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                 Daily Expenses & Groceries
               </h1>
               <Badge
                 variant={isAdmin ? "default" : "secondary"}
-                className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5"
+                className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
               >
                 {isAdmin ? (
                   <span className="flex items-center gap-1">
@@ -317,7 +317,7 @@ export default function DailyExpensesPage() {
                 )}
               </Badge>
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 font-medium">
               {isAdmin
                 ? "Review room grocery bills, approve rent liability deductions, and manage expenses."
                 : "Submit room groceries to reduce your rent liability or track personal spending."}
@@ -326,7 +326,7 @@ export default function DailyExpensesPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
           <Button
             variant="outline"
             size="icon"
@@ -334,21 +334,21 @@ export default function DailyExpensesPage() {
             disabled={isLoading || isRefreshing}
             title="Refresh expenses"
             aria-label="Refresh expenses"
-            className="h-9 w-9"
+            className="h-10 w-10 rounded-xl glass-pill shadow-xs hover:border-violet-500/40"
           >
             <RotateCw
               className={`h-4 w-4 ${
-                isRefreshing ? "animate-spin text-primary" : ""
+                isRefreshing ? "animate-spin text-violet-600" : "text-muted-foreground hover:text-foreground"
               }`}
             />
           </Button>
 
           <Button
             onClick={handleOpenCreate}
-            className="gap-2 font-semibold shadow-xs h-9 text-xs"
+            className="h-10 px-4 rounded-xl gap-2 font-bold shadow-lg shadow-violet-500/25 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
-            <Plus className="h-4 w-4" />
-            Add New Expense
+            <Plus className="h-4 w-4 shrink-0" />
+            <span>Add New Expense</span>
           </Button>
         </div>
       </div>

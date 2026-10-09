@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sidebar } from "@/components/dashboard/sidebar";
-import { Header } from "@/components/dashboard/header";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { cn } from "@/lib/utils";
-
 import { NotificationPermissionBanner } from "@/components/dashboard/notification-permission-banner";
 
 export default function DashboardLayout({
@@ -17,14 +16,28 @@ export default function DashboardLayout({
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Desktop Fixed Sidebar */}
+    <div className="relative min-h-screen flex flex-col bg-gradient-to-br from-indigo-50/90 via-pink-50/50 to-amber-50/60 dark:from-slate-950 dark:via-indigo-950/40 dark:to-purple-950/30 overflow-x-hidden selection:bg-violet-500 selection:text-white">
+      {/* Ambient Blurred Color Blobs for Gradient Mesh */}
+      <div
+        className="pointer-events-none fixed -top-24 left-1/4 h-[420px] w-[420px] rounded-full bg-violet-400/20 dark:bg-violet-600/15 blur-3xl animate-pulse-subtle"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none fixed top-1/3 -right-24 h-[460px] w-[460px] rounded-full bg-fuchsia-400/20 dark:bg-fuchsia-600/15 blur-3xl"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none fixed -bottom-24 left-1/3 h-[420px] w-[420px] rounded-full bg-amber-300/20 dark:bg-indigo-600/15 blur-3xl"
+        aria-hidden="true"
+      />
+
+      {/* Desktop Fixed Collapsible Sidebar */}
       <Sidebar
         isCollapsed={isCollapsed}
         onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
       />
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer (Sheet) */}
       <MobileNav
         open={mobileNavOpen}
         onOpenChange={setMobileNavOpen}
@@ -33,8 +46,8 @@ export default function DashboardLayout({
       {/* Main Layout Container */}
       <div
         className={cn(
-          "flex flex-1 flex-col min-h-screen transition-all duration-300 ease-in-out",
-          isCollapsed ? "md:pl-16" : "md:pl-64"
+          "flex flex-1 flex-col min-h-screen transition-all duration-300 ease-in-out relative z-10",
+          isCollapsed ? "md:pl-[72px]" : "md:pl-[260px]"
         )}
       >
         <Header
@@ -46,8 +59,8 @@ export default function DashboardLayout({
         {/* Push Notification Permission Request Banner */}
         <NotificationPermissionBanner />
 
-        {/* Independently Scrollable Main Content Area */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto bg-muted/20">
+        {/* Content Area */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           {children}
         </main>
       </div>

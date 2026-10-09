@@ -150,16 +150,16 @@ export function UserTotalsView({
             return (
               <div
                 key={item.user.id}
-                className="rounded-xl border border-border bg-card shadow-xs overflow-hidden transition-all duration-200 hover:border-primary/30"
+                className="glass-card rounded-2xl border border-white/60 dark:border-white/10 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-violet-500/30"
               >
                 {/* Main User Card Header */}
                 <div
                   onClick={() => toggleExpand(item.user.id)}
-                  className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer select-none bg-card hover:bg-muted/30 transition-colors"
+                  className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer select-none hover:bg-violet-500/5 dark:hover:bg-violet-500/10 transition-colors"
                 >
                   {/* User Profile */}
                   <div className="flex items-center gap-3.5 min-w-[220px]">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary font-bold text-sm shrink-0 border border-primary/20">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white font-bold text-sm shrink-0 shadow-md shadow-violet-500/25">
                       {item.user.name?.charAt(0).toUpperCase() || (
                         <UserIcon className="h-5 w-5" />
                       )}

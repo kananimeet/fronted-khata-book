@@ -1,5 +1,6 @@
 import React from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { KhataBookLogo } from "@/components/ui/logo";
 
 export default function AuthLayout({
   children,
@@ -32,8 +33,13 @@ export default function AuthLayout({
         </div>
       </div>
 
+      {/* Brand Logo Header */}
+      <div className="relative z-10 mb-4 flex justify-center">
+        <KhataBookLogo size="lg" showText={true} subtitle="Smart Room & Expense Portal" href="/dashboard" />
+      </div>
+
       {/* Main card container */}
-      <div className="w-full max-w-md z-10 my-auto py-6">{children}</div>
+      <div className="w-full max-w-md z-10 mb-auto py-2">{children}</div>
 
       {/* Bottom Footer */}
       <div className="relative z-10 mt-auto py-4 text-center text-xs text-muted-foreground/80 flex items-center justify-center gap-2">

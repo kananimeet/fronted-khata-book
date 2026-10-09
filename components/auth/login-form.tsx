@@ -267,14 +267,14 @@ export function LoginForm() {
               </div>
             ) : (
               <div className="relative group cursor-pointer animate-gentle-bounce">
-                <div className="relative h-20 w-20 rounded-2xl overflow-hidden shadow-xl ring-4 ring-primary/25 border-2 border-background bg-gradient-to-b from-primary/10 to-primary/5 transition-transform duration-300 group-hover:scale-105">
+                <div className="relative h-20 w-20 rounded-2xl overflow-hidden shadow-xl ring-4 ring-violet-500/25 border-2 border-background bg-gradient-to-tr from-violet-600 via-purple-600 to-fuchsia-600 p-1.5 transition-transform duration-300 group-hover:scale-105">
                   <Image
-                    src="/images/khatabook-mascot.jpg"
-                    alt="KhataBook Mascot"
+                    src="/icons/logo.svg"
+                    alt="KhataBook Logo"
                     width={80}
                     height={80}
                     priority
-                    className="object-cover w-full h-full"
+                    className="object-contain w-full h-full rounded-xl"
                   />
                 </div>
                 {/* Playful Floating Animated Wave Emoji Badge */}

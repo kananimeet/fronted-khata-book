@@ -105,17 +105,17 @@ export function DailyExpenseFilters({
   );
 
   return (
-    <div className="space-y-3.5">
+    <div className="space-y-4">
       {/* 1. Quick Tabs Bar */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar border-b border-border/60">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar p-1 rounded-2xl glass-pill border border-white/60 dark:border-white/10 shadow-xs">
         <button
           type="button"
           onClick={() => handleTabChange("all")}
           className={cn(
-            "flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer",
+            "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer",
             activeTab === "all"
-              ? "bg-primary text-primary-foreground shadow-xs shadow-primary/25"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
+              ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25"
+              : "text-muted-foreground hover:text-foreground"
           )}
         >
           <span>All Expenses</span>
@@ -125,10 +125,10 @@ export function DailyExpenseFilters({
           type="button"
           onClick={() => handleTabChange("room")}
           className={cn(
-            "flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer",
+            "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer",
             activeTab === "room"
-              ? "bg-indigo-600 text-white shadow-xs shadow-indigo-600/25"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
+              ? "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-md shadow-indigo-600/25"
+              : "text-muted-foreground hover:text-foreground"
           )}
         >
           <Home className="h-3.5 w-3.5" />
@@ -139,10 +139,10 @@ export function DailyExpenseFilters({
           type="button"
           onClick={() => handleTabChange("own")}
           className={cn(
-            "flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer",
+            "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer",
             activeTab === "own"
-              ? "bg-purple-600 text-white shadow-xs shadow-purple-600/25"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
+              ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-md shadow-purple-600/25"
+              : "text-muted-foreground hover:text-foreground"
           )}
         >
           <UserIcon className="h-3.5 w-3.5" />
@@ -153,10 +153,10 @@ export function DailyExpenseFilters({
           type="button"
           onClick={() => handleTabChange("pending")}
           className={cn(
-            "flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer",
+            "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer",
             activeTab === "pending"
-              ? "bg-amber-600 text-white shadow-xs shadow-amber-600/25"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
+              ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-600/25"
+              : "text-muted-foreground hover:text-foreground"
           )}
         >
           <Clock className="h-3.5 w-3.5" />
@@ -167,10 +167,10 @@ export function DailyExpenseFilters({
           type="button"
           onClick={() => handleTabChange("approved")}
           className={cn(
-            "flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer",
+            "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer",
             activeTab === "approved"
-              ? "bg-emerald-600 text-white shadow-xs shadow-emerald-600/25"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
+              ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md shadow-emerald-600/25"
+              : "text-muted-foreground hover:text-foreground"
           )}
         >
           <CheckCircle2 className="h-3.5 w-3.5" />
@@ -179,7 +179,7 @@ export function DailyExpenseFilters({
       </div>
 
       {/* 2. Search & Detailed Filter Inputs */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 p-3 rounded-xl border border-border/70 bg-card shadow-xs">
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 p-4 rounded-2xl glass-card shadow-lg border border-white/60 dark:border-white/10">
         {/* Search Input */}
         <div className="relative flex-1 min-w-[220px]">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />

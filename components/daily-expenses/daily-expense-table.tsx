@@ -105,36 +105,36 @@ export function DailyExpenseTable({
   }
 
   return (
-    <div className="rounded-xl border border-border/70 bg-card overflow-hidden shadow-xs">
+    <div className="glass-card rounded-2xl border border-white/60 dark:border-white/10 overflow-hidden shadow-xl">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs text-foreground">
-          <thead className="bg-muted/50 text-muted-foreground font-semibold border-b border-border/70 uppercase tracking-wider text-[11px]">
+          <thead className="bg-muted/40 text-muted-foreground font-semibold border-b border-border/50 uppercase tracking-wider text-[11px]">
             <tr>
-              <th scope="col" className="py-3 px-4">
+              <th scope="col" className="py-3.5 px-4">
                 Date & Category
               </th>
-              <th scope="col" className="py-3 px-4">
+              <th scope="col" className="py-3.5 px-4">
                 User
               </th>
-              <th scope="col" className="py-3 px-4">
+              <th scope="col" className="py-3.5 px-4">
                 Type
               </th>
-              <th scope="col" className="py-3 px-4">
+              <th scope="col" className="py-3.5 px-4">
                 Amount
               </th>
-              <th scope="col" className="py-3 px-4">
+              <th scope="col" className="py-3.5 px-4">
                 Note & Bill
               </th>
-              <th scope="col" className="py-3 px-4">
+              <th scope="col" className="py-3.5 px-4">
                 Status
               </th>
-              <th scope="col" className="py-3 px-4 text-right">
+              <th scope="col" className="py-3.5 px-4 text-right">
                 Actions
               </th>
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-border/60">
+          <tbody className="divide-y divide-border/40">
             {expenses.map((expense) => {
               const isRoom = expense.expense_type === "room";
               const isPending = expense.status === "PENDING";

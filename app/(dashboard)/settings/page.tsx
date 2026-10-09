@@ -159,15 +159,19 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 max-w-4xl mx-auto py-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-            <SettingsIcon className="h-6 w-6 text-primary" />
-            System Settings
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            Configure default room rent expense rates and portal administrative preferences.
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 ring-2 ring-white/50 dark:ring-white/10 shrink-0">
+            <SettingsIcon className="h-6 w-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+              System Settings
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 font-medium">
+              Configure default room rent expense rates and portal administrative preferences.
+            </p>
+          </div>
         </div>
 
         <Button
@@ -175,22 +179,22 @@ export default function SettingsPage() {
           size="sm"
           onClick={fetchSettings}
           disabled={isLoading || isSaving}
-          className="gap-2 text-xs self-start sm:self-auto cursor-pointer"
+          className="gap-2 text-xs self-start sm:self-auto cursor-pointer rounded-xl glass-pill h-10 px-4 hover:border-violet-500/40"
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin text-violet-600" : "text-muted-foreground"}`} />
           <span>Refresh</span>
         </Button>
       </div>
 
       {errorMessage && (
-        <div className="flex items-center gap-2 p-3.5 rounded-xl border border-destructive/30 bg-destructive/10 text-destructive text-xs font-medium">
+        <div className="flex items-center gap-2 p-4 rounded-2xl border border-destructive/30 bg-destructive/10 text-destructive text-xs font-medium">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{errorMessage}</span>
           <Button
             size="sm"
             variant="outline"
             onClick={fetchSettings}
-            className="ml-auto h-7 text-xs"
+            className="ml-auto h-7 text-xs rounded-lg"
           >
             Retry
           </Button>
@@ -199,10 +203,10 @@ export default function SettingsPage() {
 
       {/* Main Settings Form Card */}
       <form onSubmit={handleSaveSettings}>
-        <Card className="border-border shadow-xs overflow-hidden">
-          <CardHeader className="border-b border-border/60 bg-muted/20 pb-4">
+        <Card className="glass-card rounded-2xl shadow-xl border border-white/60 dark:border-white/10 overflow-hidden">
+          <CardHeader className="border-b border-border/50 bg-muted/20 pb-4">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400">
                 <Building className="h-5 w-5" />
               </div>
               <div>
@@ -275,10 +279,10 @@ export default function SettingsPage() {
                         type="button"
                         onClick={() => handlePresetClick(preset)}
                         disabled={isSaving}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border cursor-pointer ${
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                           isSelected
-                            ? "bg-primary text-primary-foreground border-primary shadow-xs"
-                            : "bg-background hover:bg-muted text-foreground border-border"
+                            ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25"
+                            : "glass-pill text-foreground hover:border-violet-500/40"
                         }`}
                       >
                         ₹{preset.toLocaleString("en-IN")}
@@ -290,18 +294,18 @@ export default function SettingsPage() {
             )}
 
             {/* Live Financial Projection Preview */}
-            <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-3">
+            <div className="rounded-2xl border border-white/60 dark:border-white/10 bg-white/40 dark:bg-slate-900/40 p-4 space-y-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                <Sparkles className="h-4 w-4 text-primary" />
+                <Sparkles className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                 <span>Behavior in Create Expense Dialog</span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed font-medium">
                 When any member or administrator opens the <strong>&quot;Room Rent Request&quot;</strong> dialog, the total room rent field will automatically default to{" "}
-                <span className="font-bold text-primary">{formatCurrency(parsedAmount)}</span>. Users can submit with this default or adjust their initial payment accordingly.
+                <span className="font-bold text-violet-600 dark:text-violet-400 font-mono">{formatCurrency(parsedAmount)}</span>. Users can submit with this default or adjust their initial payment accordingly.
               </p>
 
               {setting?.updated_at && (
-                <div className="pt-2 border-t border-border/60 flex items-center justify-between text-[11px] text-muted-foreground">
+                <div className="pt-2 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
                   <span>Last modified:</span>
                   <span className="font-medium text-foreground">{formatDate(setting.updated_at)}</span>
                 </div>
@@ -310,7 +314,7 @@ export default function SettingsPage() {
           </CardContent>
 
           {isAdmin && (
-            <CardFooter className="border-t border-border bg-muted/10 py-3.5 px-6 flex items-center justify-between gap-3">
+            <CardFooter className="border-t border-border/50 bg-muted/10 py-4 px-6 flex items-center justify-between gap-3">
               <div className="text-[11px] text-muted-foreground">
                 {hasChanges ? (
                   <span className="text-amber-600 dark:text-amber-400 font-medium">
@@ -324,7 +328,7 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 {hasChanges && (
                   <Button
                     type="button"
@@ -337,7 +341,7 @@ export default function SettingsPage() {
                         setHasChanges(false);
                       }
                     }}
-                    className="h-9 text-xs"
+                    className="h-10 text-xs rounded-xl"
                   >
                     Discard
                   </Button>
@@ -346,7 +350,7 @@ export default function SettingsPage() {
                 <Button
                   type="submit"
                   disabled={isSaving || !hasChanges || parsedAmount <= 0}
-                  className="gap-2 h-9 text-xs font-semibold shadow-xs"
+                  className="h-10 px-5 rounded-xl gap-2 text-xs font-bold shadow-lg shadow-violet-500/25 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   {isSaving ? (
                     <>
@@ -367,10 +371,10 @@ export default function SettingsPage() {
       </form>
 
       {/* Security & Access Overview Card */}
-      <Card className="border-border shadow-xs">
+      <Card className="glass-card rounded-2xl shadow-lg border border-white/60 dark:border-white/10">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-primary" />
+            <ShieldCheck className="h-4 w-4 text-violet-600 dark:text-violet-400" />
             <CardTitle className="text-sm font-semibold">Access & Permissions</CardTitle>
           </div>
         </CardHeader>

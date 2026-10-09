@@ -180,18 +180,18 @@ export default function UsersPage() {
       {/* Page Title & Top Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-xs ring-1 ring-primary/20">
-              <UsersIcon className="h-5 w-5" />
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 ring-2 ring-white/50 dark:ring-white/10 shrink-0">
+              <UsersIcon className="h-6 w-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                   Users Directory
                 </h1>
                 <Badge
                   variant={isAdmin ? "default" : "secondary"}
-                  className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5"
+                  className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
                 >
                   {isAdmin ? (
                     <span className="flex items-center gap-1">
@@ -204,7 +204,7 @@ export default function UsersPage() {
                   )}
                 </Badge>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 font-medium">
                 {isAdmin
                   ? "Manage accounts, create users, update permissions and monitor access."
                   : "View all member profiles. You can edit and update your own profile."}
@@ -213,7 +213,7 @@ export default function UsersPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
           <Button
             variant="outline"
             size="icon"
@@ -221,26 +221,26 @@ export default function UsersPage() {
             disabled={isLoading || isRefreshing}
             title="Refresh table"
             aria-label="Refresh table"
-            className="h-9 w-9"
+            className="h-10 w-10 rounded-xl glass-pill shadow-xs hover:border-violet-500/40"
           >
-            <RotateCw className={`h-4 w-4 ${isRefreshing ? "animate-spin text-primary" : ""}`} />
+            <RotateCw className={`h-4 w-4 ${isRefreshing ? "animate-spin text-violet-600" : "text-muted-foreground hover:text-foreground"}`} />
           </Button>
 
           {/* Add New User is visible ONLY to ADMIN */}
           {isAdmin && (
             <Button
               onClick={() => setCreateDialogOpen(true)}
-              className="gap-2 font-semibold shadow-xs h-9"
+              className="h-10 px-4 rounded-xl gap-2 font-bold shadow-lg shadow-violet-500/25 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
-              <UserPlus className="h-4 w-4" />
-              Add New User
+              <UserPlus className="h-4 w-4 shrink-0" />
+              <span>Add New User</span>
             </Button>
           )}
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-border bg-card shadow-xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl glass-card shadow-lg border border-white/60 dark:border-white/10">
         {/* Search Input (Debounced 300ms) */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -248,7 +248,7 @@ export default function UsersPage() {
             placeholder="Search by name, email, or mobile..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-9.5 pr-8 bg-background"
+            className="pl-9.5 pr-8 bg-white/60 dark:bg-slate-900/60 rounded-xl border-border/60"
           />
           {searchInput && (
             <button

@@ -121,8 +121,8 @@ export function UsersTable({
   // Empty state
   if (users.length === 0) {
     return (
-      <div className="w-full rounded-xl border border-dashed border-border bg-card/60 p-12 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground mb-4">
+      <div className="w-full rounded-2xl border border-dashed border-border/80 glass-card p-12 text-center shadow-lg">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-500/15 to-fuchsia-500/15 text-violet-600 dark:text-violet-400 mb-4 border border-violet-500/20">
           {hasFilters ? <SearchX className="h-7 w-7" /> : <UsersIcon className="h-7 w-7" />}
         </div>
         <h3 className="text-base font-bold text-foreground">
@@ -135,7 +135,7 @@ export function UsersTable({
         </p>
         {hasFilters && onClearFilters && (
           <div className="mt-4">
-            <Button variant="outline" size="sm" onClick={onClearFilters}>
+            <Button variant="outline" size="sm" onClick={onClearFilters} className="rounded-xl glass-pill">
               Clear Search & Filters
             </Button>
           </div>
@@ -145,10 +145,10 @@ export function UsersTable({
   }
 
   return (
-    <div className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-colors">
+    <div className="w-full overflow-hidden rounded-2xl glass-card shadow-xl border border-white/60 dark:border-white/10 transition-colors">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-border bg-muted/40 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <thead className="border-b border-border/50 bg-muted/40 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             <tr>
               <th scope="col" className="py-3.5 px-4">
                 User

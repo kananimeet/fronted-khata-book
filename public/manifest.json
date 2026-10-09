@@ -7,10 +7,22 @@
   "scope": "/",
   "display": "standalone",
   "background_color": "#090d16",
-  "theme_color": "#2563eb",
+  "theme_color": "#7c3aed",
   "orientation": "portrait-primary",
   "categories": ["finance", "productivity", "utilities"],
   "icons": [
+    {
+      "src": "/icons/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
@@ -28,13 +40,19 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "shortcuts": [
     {
       "name": "Dashboard",
       "short_name": "Dashboard",
-      "description": "Open KhataBook Dashboard",
+      "description": "Open KhataBook Dashboard Overview",
       "url": "/dashboard",
       "icons": [
         {

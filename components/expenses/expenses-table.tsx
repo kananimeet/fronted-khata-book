@@ -44,10 +44,10 @@ export function ExpensesTable({
 }: ExpensesTableProps) {
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
-        <div className="p-8 text-center space-y-3">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
-          <p className="text-xs text-muted-foreground">Loading expense requests...</p>
+      <div className="glass-card rounded-2xl border border-white/60 dark:border-white/10 overflow-hidden shadow-xl">
+        <div className="p-12 text-center space-y-3">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-violet-600 border-r-transparent" />
+          <p className="text-xs text-muted-foreground font-medium">Loading expense requests...</p>
         </div>
       </div>
     );
@@ -55,9 +55,9 @@ export function ExpensesTable({
 
   if (expenses.length === 0) {
     return (
-      <div className="flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-dashed border-border p-8 text-center bg-card/60 shadow-xs">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground mb-3">
-          <Inbox className="h-6 w-6" />
+      <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-dashed border-border/80 p-8 text-center glass-card shadow-lg">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-500/15 to-fuchsia-500/15 text-violet-600 dark:text-violet-400 mb-3 border border-violet-500/20">
+          <Inbox className="h-7 w-7" />
         </div>
         <h3 className="text-base font-semibold text-foreground">
           No expense requests found
@@ -72,10 +72,10 @@ export function ExpensesTable({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+    <div className="glass-card rounded-2xl shadow-xl border border-white/60 dark:border-white/10 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
-          <thead className="bg-muted/50 border-b border-border text-muted-foreground uppercase font-semibold text-[11px] tracking-wider">
+          <thead className="bg-muted/40 border-b border-border/50 text-muted-foreground uppercase font-semibold text-[11px] tracking-wider">
             <tr>
               <th className="px-4 py-3.5">User</th>
               <th className="px-4 py-3.5">Purpose / Note</th>
@@ -88,7 +88,7 @@ export function ExpensesTable({
               <th className="px-4 py-3.5 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/60">
+          <tbody className="divide-y divide-border/40">
             {expenses.map((expense) => {
               const total = Number(expense.total_amount) || 0;
               const pay = Number(expense.pay_amount) || 0;
