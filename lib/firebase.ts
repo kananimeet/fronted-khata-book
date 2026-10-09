@@ -12,7 +12,7 @@ import {
 export const firebaseConfig = {
   apiKey:
     process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
-    "AIzaSyOGtkmM7cdF5K8bwmX0wFyzBdcszg4ktHQ",
+    "AIzaSyDGtkmH7ccP5K8bwmsBwfyzBdcrsg6XthQ",
   authDomain:
     process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
     "khatabook-d0342.firebaseapp.com",
@@ -32,7 +32,7 @@ export const firebaseConfig = {
 
 export const FIREBASE_VAPID_KEY =
   process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY ||
-  "BKeOKRVj-G4MzbKYIkwwXGFlknL_RjBbccu8ZDtbUp8ELZjxt-9iKL4sztaFXLSw2xT1gO0jZNDQLTIgH753EN0";
+  "BKeOKRvj-G4MzbKYIkwwXGFlknL_RjBbccu8ZDtbUp8ELZjxt-9iKL4sztaFXLSw2xT1gO0jZNDQLTIgH753EN0";
 
 /**
  * Initializes and returns the Firebase app singleton.
