@@ -32,7 +32,7 @@ export const firebaseConfig = {
 
 export const FIREBASE_VAPID_KEY =
   process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY ||
-  "BKeOKRvj-G4MzbKYIkwwXGFlknL_RjBbccu8ZDtbUp8ELZjxt-9iKL4sztaFXLSw2xT1gO0jZNDQLTIgH753EN0";
+  "BD9mDtKSXR_a9f8ZKYnwb7stY0m_1qYcLkq4wINnZ_lwhGD2qV4oLEuBnzyO_-qA1uU44EmPKh2OK540zCj8Bik";
 
 /**
  * Initializes and returns the Firebase app singleton.
