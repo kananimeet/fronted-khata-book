@@ -39,6 +39,14 @@ const firebaseConfig = {
 // Deduplication cache to prevent duplicate notifications between push and onBackgroundMessage
 const recentNotifications = new Map();
 
+
+function resolveAssetUrl(url) {
+  if (!url) return 'https://fronted-khata-book.vercel.app/icons/icon-192x192.png';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  const origin = (self.location && self.location.origin) ? self.location.origin : 'https://fronted-khata-book.vercel.app';
+  return origin + (url.startsWith('/') ? '' : '/') + url;
+}
+
 function displayPushNotification(title, options) {
   const tag = options.tag || `khata-${Date.now()}`;
   const now = Date.now();
@@ -104,13 +112,15 @@ try {
 
     const options = {
       body,
-      icon,
-      badge,
+      icon: resolveAssetUrl(icon),
+      badge: resolveAssetUrl(badge),
+      image: resolveAssetUrl(icon),
       data: {
         ...(payload.data || {}),
         link: clickAction,
       },
-      vibrate: [300, 100, 300],
+      vibrate: [300, 100, 300, 100, 300],
+    silent: false,
       tag,
       renotify: true,
       requireInteraction: true,
@@ -158,13 +168,15 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body,
-    icon,
-    badge,
+    icon: resolveAssetUrl(icon),
+    badge: resolveAssetUrl(badge),
+    image: resolveAssetUrl(icon),
     data: {
       ...extraData,
       link,
     },
-    vibrate: [300, 100, 300],
+    vibrate: [300, 100, 300, 100, 300],
+    silent: false,
     tag,
     renotify: true,
     requireInteraction: true,
