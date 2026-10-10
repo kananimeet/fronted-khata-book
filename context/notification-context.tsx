@@ -173,6 +173,30 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       // Show foreground Toast notification to the user
       toast.info(body, title);
 
+      // Trigger native browser / mobile system popup even in foreground
+      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+        try {
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then((reg) => {
+              reg.showNotification(title, {
+                body,
+                icon: '/icons/icon-192x192.png',
+                badge: '/icons/icon-192x192.png',
+                vibrate: [200, 100, 200],
+                data: payload.data || {},
+              });
+            }).catch(() => {});
+          } else {
+            new Notification(title, {
+              body,
+              icon: '/icons/icon-192x192.png',
+            });
+          }
+        } catch (e) {
+          console.warn('[Foreground Notification] popup warning:', e);
+        }
+      }
+
       // Increment unread count & refresh notifications
       setUnreadCount((prev) => prev + 1);
       refreshNotifications();
