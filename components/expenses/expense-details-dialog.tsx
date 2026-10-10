@@ -57,19 +57,20 @@ export function ExpenseDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[560px] max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center justify-between pr-6">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Receipt className="h-5 w-5" />
+      <DialogContent className="sm:max-w-[620px] max-h-[88vh] overflow-y-auto p-0 border border-white/60 dark:border-white/10 glass-card rounded-3xl shadow-2xl overflow-hidden">
+        {/* Top Header Banner */}
+        <DialogHeader className="p-5 pb-4 bg-gradient-to-r from-violet-600/15 via-purple-600/10 to-fuchsia-600/15 border-b border-border/50">
+          <div className="flex items-center justify-between pr-6 gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25 shrink-0">
+                <Receipt className="h-6 w-6" />
               </div>
               <div>
-                <DialogTitle className="text-lg font-bold">
-                  Expense Request Details
+                <DialogTitle className="text-lg font-extrabold tracking-tight text-foreground">
+                  Room Expense Details
                 </DialogTitle>
-                <DialogDescription className="text-xs">
-                  Created on {formatDate(expense.created_at)}
+                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                  Invoice ID #{String(expense.id).slice(-6)} • Issued on {formatDate(expense.created_at)}
                 </DialogDescription>
               </div>
             </div>
@@ -77,61 +78,66 @@ export function ExpenseDetailsDialog({
           </div>
         </DialogHeader>
 
-        <div className="space-y-4 py-2 text-sm">
+        <div className="space-y-4 p-5 text-sm">
           {/* User info if available */}
           {expense.user && (
-            <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/30">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">
-                {expense.user.name?.charAt(0).toUpperCase() || <UserIcon className="h-5 w-5" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-foreground truncate">
-                  {expense.user.name}
+            <div className="flex items-center justify-between p-3.5 rounded-2xl border border-white/60 dark:border-white/10 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md shadow-xs">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-500/20 to-fuchsia-500/20 text-violet-600 dark:text-violet-400 font-extrabold text-sm border border-violet-500/30 shrink-0">
+                  {expense.user.name?.charAt(0).toUpperCase() || <UserIcon className="h-5 w-5" />}
                 </div>
-                <div className="text-xs text-muted-foreground truncate">
-                  {expense.user.email} {expense.user.mobile ? `• ${expense.user.mobile}` : ""}
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-sm text-foreground truncate">
+                    {expense.user.name}
+                  </div>
+                  <div className="text-xs text-muted-foreground truncate">
+                    {expense.user.email} {expense.user.mobile ? `• ${expense.user.mobile}` : ""}
+                  </div>
                 </div>
               </div>
+              <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 shrink-0">
+                Roommate
+              </span>
             </div>
           )}
 
           {/* Financial Breakdown Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            <div className="p-3 rounded-xl border border-border bg-card">
-              <div className="text-[10px] text-muted-foreground uppercase font-bold">
+            <div className="p-3.5 rounded-2xl border border-violet-500/20 bg-violet-500/5 backdrop-blur-md">
+              <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
                 Total Room Rate
               </div>
-              <div className="text-base font-bold text-foreground mt-0.5">
+              <div className="text-base font-extrabold font-mono text-foreground mt-1">
                 {formatCurrency(total)}
               </div>
             </div>
 
-            <div className="p-3 rounded-xl border border-border bg-card">
-              <div className="text-[10px] text-muted-foreground uppercase font-bold">
+            <div className="p-3.5 rounded-2xl border border-purple-500/20 bg-purple-500/5 backdrop-blur-md">
+              <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
                 Requested Pay
               </div>
-              <div className="text-base font-bold text-primary mt-0.5">
+              <div className="text-base font-extrabold font-mono text-purple-600 dark:text-purple-400 mt-1">
                 {formatCurrency(pay)}
               </div>
             </div>
 
-            <div className="p-3 rounded-xl border border-border bg-card">
-              <div className="text-[10px] text-muted-foreground uppercase font-bold">
+            <div className="p-3.5 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 backdrop-blur-md">
+              <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
                 Approved Total
               </div>
-              <div className="text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+              <div className="text-base font-extrabold font-mono text-emerald-600 dark:text-emerald-400 mt-1">
                 {formatCurrency(paid)}
               </div>
             </div>
 
-            <div className="p-3 rounded-xl border border-border bg-card">
-              <div className="text-[10px] text-muted-foreground uppercase font-bold">
+            <div className="p-3.5 rounded-2xl border border-amber-500/20 bg-amber-500/5 backdrop-blur-md">
+              <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
                 Remaining Due
               </div>
               <div
-                className={`text-base font-bold mt-0.5 ${
+                className={`text-base font-extrabold font-mono mt-1 ${
                   remaining > 0
-                    ? "text-blue-600 dark:text-blue-400"
+                    ? "text-amber-600 dark:text-amber-400"
                     : "text-emerald-600 dark:text-emerald-400"
                 }`}
               >
@@ -251,12 +257,12 @@ export function ExpenseDetailsDialog({
 
           if (isAdmin && hasPendingPayment) {
             return (
-              <div className="pt-3 border-t border-border flex items-center justify-between gap-3">
-                <span className="text-xs text-amber-500 font-medium flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 animate-spin" />
+              <div className="p-4 border-t border-border/50 bg-muted/30 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span className="text-xs text-amber-500 font-semibold flex items-center gap-1.5">
+                  <Clock className="h-4 w-4 animate-spin shrink-0" />
                   Installment request awaiting admin approval
                 </span>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                   {onReject && (
                     <Button
                       variant="outline"
@@ -264,7 +270,7 @@ export function ExpenseDetailsDialog({
                         onOpenChange(false);
                         onReject(expense);
                       }}
-                      className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-950/40 text-xs font-semibold"
+                      className="text-destructive border-destructive/30 hover:bg-destructive/10 text-xs font-bold rounded-xl"
                     >
                       <XCircle className="h-3.5 w-3.5 mr-1" />
                       Reject
@@ -276,7 +282,7 @@ export function ExpenseDetailsDialog({
                         onOpenChange(false);
                         onApprove(expense);
                       }}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs gap-1.5 shadow-xs"
+                      className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs gap-1.5 shadow-md shadow-emerald-500/20 rounded-xl"
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       Approve Payment ({formatCurrency(pendingPayment?.amount ?? pay)})
@@ -289,9 +295,9 @@ export function ExpenseDetailsDialog({
 
           if (!isAdmin && hasPendingPayment) {
             return (
-              <div className="pt-3 border-t border-border flex items-center justify-between">
-                <span className="text-xs text-amber-500 font-medium flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 animate-spin" />
+              <div className="p-4 border-t border-border/50 bg-amber-500/10 backdrop-blur-md flex items-center justify-between">
+                <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-2">
+                  <Clock className="h-4 w-4 animate-spin shrink-0" />
                   Your payment request of {formatCurrency(pendingPayment?.amount ?? pay)} is pending admin approval.
                 </span>
               </div>
@@ -300,13 +306,13 @@ export function ExpenseDetailsDialog({
 
           if (canPayRemaining && remaining > 0 && onPayRemaining) {
             return (
-              <div className="pt-3 border-t border-border flex justify-end">
+              <div className="p-4 border-t border-border/50 bg-muted/20 backdrop-blur-md flex justify-end">
                 <Button
                   onClick={() => {
                     onOpenChange(false);
                     onPayRemaining(expense);
                   }}
-                  className="gap-2 font-semibold shadow-xs bg-blue-600 hover:bg-blue-700 text-white"
+                  className="gap-2 font-bold shadow-md shadow-violet-500/25 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white rounded-xl"
                 >
                   <CreditCard className="h-4 w-4" />
                   Pay Remaining ({formatCurrency(remaining)})

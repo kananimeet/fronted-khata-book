@@ -31,15 +31,17 @@ export function DailyExpenseReceiptModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl p-0 overflow-hidden bg-background border border-border/80 shadow-2xl">
-        <DialogHeader className="p-4 border-b border-border/80 flex flex-row items-center justify-between gap-3 bg-muted/20 shrink-0">
+      <DialogContent className="sm:max-w-2xl p-0 overflow-hidden border border-white/60 dark:border-white/10 glass-card rounded-3xl shadow-2xl">
+        <DialogHeader className="p-5 border-b border-border/50 flex flex-row items-center justify-between gap-3 bg-gradient-to-r from-violet-600/15 via-purple-600/10 to-fuchsia-600/15 shrink-0">
           <div>
-            <DialogTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-              <FileText className="h-4 w-4 text-primary" />
+            <DialogTitle className="text-base font-extrabold tracking-tight text-foreground flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white shadow-xs">
+                <FileText className="h-4 w-4" />
+              </div>
               Receipt / Bill Verification
             </DialogTitle>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {formatCurrency(expense.amount)} • {expense.category} •{" "}
+            <p className="text-xs text-muted-foreground mt-1 font-medium">
+              <span className="font-mono font-bold text-foreground">{formatCurrency(expense.amount)}</span> • {expense.category} •{" "}
               {formatDate(expense.expense_date)}
             </p>
           </div>
@@ -50,7 +52,7 @@ export function DailyExpenseReceiptModal({
               variant="outline"
               size="sm"
               asChild
-              className="h-8 text-xs gap-1.5"
+              className="h-8 text-xs gap-1.5 rounded-xl glass-pill font-semibold"
             >
               <a
                 href={photoUrl}

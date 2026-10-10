@@ -187,41 +187,41 @@ export function UserTotalsView({
                   {/* Financial KPI Numbers */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 text-xs text-left">
                     <div>
-                      <div className="text-[10px] text-muted-foreground uppercase font-bold">
+                      <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
                         Room Rate
                       </div>
-                      <div className="text-sm font-bold text-foreground mt-0.5">
+                      <div className="text-sm font-extrabold font-mono text-foreground mt-0.5">
                         {formatCurrency(item.total_amount)}
                       </div>
                     </div>
 
                     <div>
-                      <div className="text-[10px] text-muted-foreground uppercase font-bold">
+                      <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
                         Total Approved
                       </div>
-                      <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                      <div className="text-sm font-extrabold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
                         {formatCurrency(item.total ?? item.total_approved)}
                       </div>
                     </div>
 
                     <div>
-                      <div className="text-[10px] text-muted-foreground uppercase font-bold">
+                      <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
                         Total Pending
                       </div>
-                      <div className="text-sm font-bold text-amber-600 dark:text-amber-400 mt-0.5">
+                      <div className="text-sm font-extrabold font-mono text-amber-600 dark:text-amber-400 mt-0.5">
                         {formatCurrency(item.total_pending)}
                       </div>
                     </div>
 
                     <div>
-                      <div className="text-[10px] text-muted-foreground uppercase font-bold">
+                      <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
                         Remaining Due
                       </div>
                       <div
-                        className={`text-sm font-bold mt-0.5 ${
+                        className={`text-sm font-extrabold font-mono mt-0.5 ${
                           item.total_remaining > 0
-                            ? "text-blue-600 dark:text-blue-400"
-                            : "text-muted-foreground"
+                            ? "text-amber-600 dark:text-amber-400"
+                            : "text-emerald-600 dark:text-emerald-400"
                         }`}
                       >
                         {formatCurrency(item.total_remaining)}

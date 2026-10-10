@@ -232,24 +232,28 @@ export function UsersTable({
 
                   {/* Role */}
                   <td className="py-3.5 px-4">
-                    <Badge
-                      variant={user.role === "ADMIN" ? "default" : "secondary"}
-                      className="text-[11px] font-semibold tracking-wide"
-                    >
-                      {user.role || "USER"}
-                    </Badge>
+                    {user.role === "ADMIN" ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-xs">
+                        Admin
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-500/20">
+                        Member
+                      </span>
+                    )}
                   </td>
 
                   {/* Status */}
                   <td className="py-3.5 px-4">
                     {isActive ? (
-                      <Badge variant="success" className="text-[11px] font-medium">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         Active
-                      </Badge>
+                      </span>
                     ) : (
-                      <Badge variant="inactive" className="text-[11px] font-medium">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-muted text-muted-foreground border">
                         Inactive
-                      </Badge>
+                      </span>
                     )}
                   </td>
 
@@ -271,7 +275,7 @@ export function UsersTable({
                         onClick={() => onViewUser(user)}
                         title="View user details"
                         aria-label="View user details"
-                        className="text-muted-foreground hover:text-foreground hover:bg-muted"
+                        className="rounded-xl glass-pill text-muted-foreground hover:text-violet-600 hover:bg-violet-500/10"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>

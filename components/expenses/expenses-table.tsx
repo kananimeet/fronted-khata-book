@@ -126,16 +126,16 @@ export function ExpensesTable({
                   {/* User info (Visible to all: Members & Admin) */}
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs shrink-0">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-violet-500/20 to-fuchsia-500/20 text-violet-600 dark:text-violet-400 font-extrabold text-xs shrink-0 border border-violet-500/20 shadow-xs">
                         {expense.user?.name?.charAt(0).toUpperCase() || (
                           <UserIcon className="h-4 w-4" />
                         )}
                       </div>
                       <div className="min-w-0">
-                        <div className="font-semibold text-foreground truncate max-w-[130px]">
+                        <div className="font-bold text-foreground truncate max-w-[130px]">
                           {expense.user?.name || "Unknown"}
                           {isOwner && (
-                            <span className="ml-1.5 text-[10px] text-primary font-normal bg-primary/10 px-1 py-0.2 rounded">
+                            <span className="ml-1.5 text-[10px] text-violet-600 dark:text-violet-400 font-semibold bg-violet-500/10 px-1.5 py-0.5 rounded-full border border-violet-500/20">
                               (You)
                             </span>
                           )}
@@ -151,23 +151,23 @@ export function ExpensesTable({
                   <td className="px-4 py-3.5 font-medium text-foreground max-w-[180px]">
                     <div className="truncate font-semibold">{expense.note || "room pay"}</div>
                     {expense.admin_note && (
-                      <div className="text-[10px] text-primary italic truncate">
+                      <div className="text-[10px] text-violet-600 dark:text-violet-400 italic truncate">
                         Admin: {expense.admin_note}
                       </div>
                     )}
                   </td>
 
                   {/* Room Rent Total */}
-                  <td className="px-4 py-3.5 font-semibold text-foreground whitespace-nowrap">
+                  <td className="px-4 py-3.5 font-bold font-mono text-foreground whitespace-nowrap">
                     {formatCurrency(total)}
                   </td>
 
                   {/* Requested Pay Amount */}
-                  <td className="px-4 py-3.5 font-semibold text-primary whitespace-nowrap">
+                  <td className="px-4 py-3.5 font-bold font-mono text-purple-600 dark:text-purple-400 whitespace-nowrap">
                     <div className="flex flex-col">
                       <span>{formatCurrency(pay)}</span>
                       {hasPendingPayment && expense.status === "REMAINING" && (
-                        <span className="text-[10px] text-amber-500 font-semibold">
+                        <span className="text-[10px] text-amber-500 font-semibold font-sans">
                           Installment Req
                         </span>
                       )}
@@ -175,18 +175,18 @@ export function ExpensesTable({
                   </td>
 
                   {/* Approved Paid Total */}
-                  <td className="px-4 py-3.5 font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                  <td className="px-4 py-3.5 font-bold font-mono text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
                     {formatCurrency(paid)}
                   </td>
 
                   {/* Remaining Balance */}
-                  <td className="px-4 py-3.5 whitespace-nowrap">
+                  <td className="px-4 py-3.5 whitespace-nowrap font-mono font-bold">
                     <span
-                      className={`font-semibold ${
+                      className={
                         remaining > 0
-                          ? "text-blue-600 dark:text-blue-400 font-bold"
+                          ? "text-amber-600 dark:text-amber-400"
                           : "text-muted-foreground"
-                      }`}
+                      }
                     >
                       {formatCurrency(remaining)}
                     </span>

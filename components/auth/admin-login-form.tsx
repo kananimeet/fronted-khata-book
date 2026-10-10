@@ -101,17 +101,17 @@ export function AdminLoginForm() {
 
   return (
     <div className="w-full space-y-4">
-      <Card className="w-full shadow-2xl border-border/80 bg-card/95 backdrop-blur-xl relative overflow-hidden transition-all duration-300">
+      <Card className="w-full shadow-2xl border-white/60 dark:border-white/10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl relative overflow-hidden transition-all duration-300 rounded-3xl">
         {/* Top vibrant admin accent bar */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-primary" />
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600" />
 
         <CardHeader className="space-y-3 text-center pb-4 pt-8">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shadow-inner ring-1 ring-indigo-500/20 transition-transform duration-300 hover:scale-105">
-            <ShieldCheck className="h-7 w-7" />
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-fuchsia-600 text-white shadow-lg shadow-indigo-500/25 transition-transform duration-300 hover:scale-105">
+            <ShieldCheck className="h-8 w-8" />
           </div>
 
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-wider mb-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-wider mb-2 border border-indigo-500/20">
               <KeySquare className="h-3 w-3" />
               Restricted Area
             </div>
@@ -119,14 +119,14 @@ export function AdminLoginForm() {
               KhataBook Admin Portal
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
-              Sign in with your administrative account to access user management and financial systems
+              Sign in with your administrative account to access room management and member ledgers
             </CardDescription>
           </div>
         </CardHeader>
 
         {apiError && (
           <div className="px-6 pb-2 animate-step-transition">
-            <Alert variant="destructive" className="py-2.5 border-destructive/30 bg-destructive/10">
+            <Alert variant="destructive" className="py-2.5 border-destructive/30 bg-destructive/10 rounded-xl">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <AlertDescription className="text-xs font-medium ml-2">
                 {apiError}
@@ -143,7 +143,7 @@ export function AdminLoginForm() {
                 Admin Email
               </Label>
               <div className="relative group">
-                <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
+                <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-indigo-600 transition-colors pointer-events-none" />
                 <Input
                   id="admin-email"
                   type="email"
@@ -151,7 +151,7 @@ export function AdminLoginForm() {
                   autoComplete="email"
                   autoFocus
                   disabled={isLoading}
-                  className={`pl-9.5 ${
+                  className={`pl-9.5 rounded-xl ${
                     errors.email ? "border-destructive focus-visible:ring-destructive" : ""
                   }`}
                   {...register("email")}
@@ -168,14 +168,14 @@ export function AdminLoginForm() {
                 Admin Password
               </Label>
               <div className="relative group">
-                <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
+                <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-indigo-600 transition-colors pointer-events-none" />
                 <Input
                   id="admin-password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   autoComplete="current-password"
                   disabled={isLoading}
-                  className={`pl-9.5 pr-10 ${
+                  className={`pl-9.5 pr-10 rounded-xl ${
                     errors.password ? "border-destructive focus-visible:ring-destructive" : ""
                   }`}
                   {...register("password")}
@@ -199,7 +199,7 @@ export function AdminLoginForm() {
           <CardFooter className="flex flex-col gap-3 pt-2 pb-6">
             <Button
               type="submit"
-              className="w-full font-semibold shadow-md h-10 transition-all hover:shadow-lg bg-indigo-600 hover:bg-indigo-700 text-white"
+              className="w-full font-bold shadow-md h-11 text-sm bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600 hover:from-indigo-700 hover:to-fuchsia-700 text-white rounded-xl shadow-indigo-500/25 hover:shadow-lg transition-all"
               disabled={isLoading}
             >
               {isLoading ? (

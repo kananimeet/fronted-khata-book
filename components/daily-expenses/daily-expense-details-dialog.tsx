@@ -87,20 +87,20 @@ export function DailyExpenseDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-xl max-h-[90vh] flex flex-col p-0 overflow-hidden border border-white/60 dark:border-white/10 glass-card rounded-3xl shadow-2xl">
         {/* Header */}
-        <DialogHeader className="p-5 pb-4 border-b border-border/80 bg-muted/20 shrink-0">
+        <DialogHeader className="p-5 pb-4 border-b border-border/50 bg-gradient-to-r from-violet-600/15 via-purple-600/10 to-fuchsia-600/15 shrink-0">
           <div className="flex items-center justify-between gap-3 pr-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-xs">
-                <Receipt className="h-5 w-5" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25 shrink-0">
+                <Receipt className="h-6 w-6" />
               </div>
               <div>
-                <DialogTitle className="text-base font-bold text-foreground">
+                <DialogTitle className="text-lg font-extrabold tracking-tight text-foreground">
                   Daily Expense Details
                 </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                  Expense ID: #{String(expense.id).slice(-6)} • Recorded on{" "}
+                  Receipt ID #{String(expense.id).slice(-6)} • Recorded on{" "}
                   {formatDate(expense.created_at || expense.expense_date)}
                 </DialogDescription>
               </div>
@@ -313,7 +313,7 @@ export function DailyExpenseDetailsDialog({
         </div>
 
         {/* Footer Actions */}
-        <DialogFooter className="p-4 border-t border-border/80 bg-muted/20 flex flex-row items-center justify-between gap-2 shrink-0">
+        <DialogFooter className="p-4 border-t border-border/50 bg-muted/20 backdrop-blur-md flex flex-row items-center justify-between gap-2 shrink-0">
           <div className="flex items-center gap-2">
             {/* Admin Direct Approve / Reject inside Details */}
             {canAdminApprove && (
@@ -325,23 +325,23 @@ export function DailyExpenseDetailsDialog({
                     onOpenChange(false);
                     onApproveExpense?.(expense);
                   }}
-                  className="h-8 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
+                  className="h-9 px-3.5 text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md shadow-emerald-500/20 rounded-xl"
                 >
-                  <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                  <CheckCircle2 className="h-4 w-4 mr-1.5" />
                   Approve
                 </Button>
 
                 <Button
                   type="button"
                   size="sm"
-                  variant="destructive"
+                  variant="outline"
                   onClick={() => {
                     onOpenChange(false);
                     onRejectExpense?.(expense);
                   }}
-                  className="h-8 text-xs font-semibold"
+                  className="h-9 px-3.5 text-xs font-bold text-destructive border-destructive/30 hover:bg-destructive/10 rounded-xl"
                 >
-                  <XCircle className="h-3.5 w-3.5 mr-1" />
+                  <XCircle className="h-4 w-4 mr-1.5" />
                   Reject
                 </Button>
               </>
@@ -358,7 +358,7 @@ export function DailyExpenseDetailsDialog({
                     onOpenChange(false);
                     onEditExpense?.(expense);
                   }}
-                  className="h-8 text-xs"
+                  className="h-9 px-3 text-xs font-semibold rounded-xl"
                 >
                   <Edit className="h-3.5 w-3.5 mr-1" />
                   Edit
@@ -371,7 +371,7 @@ export function DailyExpenseDetailsDialog({
                     onOpenChange(false);
                     onDeleteExpense?.(expense);
                   }}
-                  className="h-8 text-xs text-destructive hover:bg-destructive/10"
+                  className="h-9 px-3 text-xs text-destructive hover:bg-destructive/10 rounded-xl font-semibold"
                 >
                   <Trash2 className="h-3.5 w-3.5 mr-1" />
                   Delete
@@ -385,7 +385,7 @@ export function DailyExpenseDetailsDialog({
             variant="outline"
             size="sm"
             onClick={() => onOpenChange(false)}
-            className="h-8 text-xs"
+            className="h-9 px-4 text-xs font-semibold rounded-xl glass-pill"
           >
             Close
           </Button>

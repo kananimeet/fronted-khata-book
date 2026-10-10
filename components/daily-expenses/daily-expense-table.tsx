@@ -89,11 +89,11 @@ export function DailyExpenseTable({
 
   if (expenses.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border/80 bg-card/60 p-12 text-center shadow-xs">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4 shadow-xs">
+      <div className="rounded-2xl border border-dashed border-border/80 glass-card p-12 text-center shadow-lg">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-500/15 to-fuchsia-500/15 text-violet-600 dark:text-violet-400 mb-4 border border-violet-500/20 shadow-xs">
           <Receipt className="h-7 w-7" />
         </div>
-        <h3 className="text-base font-bold text-foreground">
+        <h3 className="text-base font-extrabold text-foreground">
           No daily expenses found
         </h3>
         <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
@@ -297,7 +297,7 @@ export function DailyExpenseTable({
                         variant="ghost"
                         size="sm"
                         onClick={() => onViewExpense(expense)}
-                        className="h-8 px-2 text-xs font-semibold text-primary hover:text-primary hover:bg-primary/10 gap-1"
+                        className="h-8 px-2.5 text-xs font-bold text-violet-600 dark:text-violet-400 hover:bg-violet-500/10 gap-1.5 rounded-xl glass-pill"
                         title="View expense details"
                         aria-label="View expense details"
                       >
@@ -313,7 +313,7 @@ export function DailyExpenseTable({
                             size="sm"
                             variant="ghost"
                             onClick={() => onApproveExpense(expense)}
-                            className="h-8 px-2 text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10"
+                            className="h-8 px-2.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10 rounded-xl"
                             title="Approve expense"
                           >
                             <CheckCircle2 className="h-4 w-4 mr-1 text-emerald-600" />
@@ -325,7 +325,7 @@ export function DailyExpenseTable({
                             size="sm"
                             variant="ghost"
                             onClick={() => onRejectExpense(expense)}
-                            className="h-8 px-2 text-xs font-semibold text-destructive hover:bg-destructive/10"
+                            className="h-8 px-2.5 text-xs font-bold text-destructive hover:bg-destructive/10 rounded-xl"
                             title="Reject expense"
                           >
                             <XCircle className="h-4 w-4 mr-1" />

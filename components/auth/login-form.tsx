@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -251,9 +252,9 @@ export function LoginForm() {
   return (
     <div className="w-full space-y-4">
       {/* Main Glassmorphic Card */}
-      <Card className="w-full shadow-2xl border-border/80 bg-card/95 backdrop-blur-xl relative overflow-hidden transition-all duration-300">
-        {/* Top radiant animated bar */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-primary to-indigo-500" />
+      <Card className="w-full shadow-2xl border-white/60 dark:border-white/10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl relative overflow-hidden transition-all duration-300 rounded-3xl">
+        {/* Top radiant brand animated bar */}
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600" />
 
         {/* Card Header with Cute Mascot & Animated Emoji */}
         <CardHeader className="space-y-3 text-center pb-3 pt-7">
@@ -405,7 +406,7 @@ export function LoginForm() {
             <CardFooter className="flex flex-col gap-3 pt-2 pb-6">
               <Button
                 type="submit"
-                className="w-full font-semibold shadow-md group h-10 transition-all hover:shadow-lg"
+                className="w-full font-bold shadow-md h-11 text-sm bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-700 hover:via-purple-700 hover:to-fuchsia-700 text-white rounded-xl shadow-violet-500/25 hover:shadow-lg transition-all group"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -562,7 +563,7 @@ export function LoginForm() {
             <CardFooter className="flex flex-col gap-3 pt-2 pb-6">
               <Button
                 type="submit"
-                className="w-full font-semibold shadow-md h-10 transition-all hover:shadow-lg"
+                className="w-full font-bold shadow-md h-11 text-sm bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-700 hover:via-purple-700 hover:to-fuchsia-700 text-white rounded-xl shadow-violet-500/25 hover:shadow-lg transition-all"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -666,7 +667,7 @@ export function LoginForm() {
             <CardFooter className="flex flex-col gap-3 pt-2 pb-6">
               <Button
                 type="submit"
-                className="w-full font-semibold shadow-md h-10 transition-all hover:shadow-lg"
+                className="w-full font-bold shadow-md h-11 text-sm bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-700 hover:via-purple-700 hover:to-fuchsia-700 text-white rounded-xl shadow-violet-500/25 hover:shadow-lg transition-all"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -692,6 +693,17 @@ export function LoginForm() {
           </form>
         )}
       </Card>
+
+      {/* Admin Portal Gateway Link */}
+      <div className="text-center pt-1">
+        <Link
+          href="/admin/login"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-violet-600 dark:hover:text-violet-400 transition-colors py-1 px-3 rounded-full hover:bg-violet-500/10"
+        >
+          <span>Admin Portal Gateway</span>
+          <ArrowRight className="h-3 w-3" />
+        </Link>
+      </div>
     </div>
   );
 }
