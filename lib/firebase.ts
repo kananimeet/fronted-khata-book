@@ -111,6 +111,17 @@ export async function requestFcmToken(): Promise<string | null> {
 
     await navigator.serviceWorker.ready;
 
+    // Reset any stale subscription to avoid mismatched VAPID / 401 token errors
+    try {
+      const existingSub = await registration.pushManager.getSubscription();
+      if (existingSub) {
+        console.log('[Firebase] Cleaning up stale push subscription...');
+        await existingSub.unsubscribe();
+      }
+    } catch (subErr) {
+      console.warn('[Firebase] Stale subscription cleanup:', subErr);
+    }
+
     // Fetch FCM registration token
     const tokenOptions: { serviceWorkerRegistration: ServiceWorkerRegistration; vapidKey?: string } = {
       serviceWorkerRegistration: registration,
