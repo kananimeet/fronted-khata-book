@@ -9,7 +9,11 @@
   "background_color": "#090d16",
   "theme_color": "#7c3aed",
   "orientation": "portrait-primary",
-  "categories": ["finance", "productivity", "utilities"],
+  "categories": [
+    "finance",
+    "productivity",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "/icons/logo.svg",
@@ -85,5 +89,6 @@
         }
       ]
     }
-  ]
+  ],
+  "gcm_sender_id": "103953800507"
 }
