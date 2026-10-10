@@ -184,7 +184,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 badge: '/icons/icon-192x192.png',
                 vibrate: [200, 100, 200],
                 data: payload.data || {},
-              });
+              } as any);
             }).catch(() => {});
           } else {
             new Notification(title, {
