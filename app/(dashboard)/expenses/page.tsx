@@ -408,8 +408,8 @@ function ExpensesContent() {
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                   {isAdmin
-                    ? "Room Rate & Expense Management"
-                    : "My Room Rent & Expenses"}
+                    ? "Room Rent & Collection Management"
+                    : "My Room Rent & Collections"}
                 </h1>
                 <Badge
                   variant={isAdmin ? "default" : "secondary"}
@@ -428,7 +428,7 @@ function ExpensesContent() {
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 font-medium">
                 {isAdmin
-                  ? "Track user room expenses, approve installment payments, and view real-time totals."
+                  ? "Track member room rent collections, approve installment payments, and view real-time totals."
                   : "Submit room rent requests, pay remaining balances, and view your payment history."}
               </p>
             </div>

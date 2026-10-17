@@ -58,9 +58,9 @@ export default function manifest(): MetadataRoute.Manifest {
         icons: [{ src: "/icons/icon-192x192.png", sizes: "192x192" }],
       },
       {
-        name: "Room Expenses",
+        name: "Room Rent & Collections",
         short_name: "Room Rent",
-        description: "Manage Room Rent and Installments",
+        description: "Manage Room Rent and Collections",
         url: "/expenses",
         icons: [{ src: "/icons/icon-192x192.png", sizes: "192x192" }],
       },

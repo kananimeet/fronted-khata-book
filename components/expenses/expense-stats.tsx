@@ -26,12 +26,12 @@ export function ExpenseStats({
     totalRoomRate > 0
       ? Math.min(100, Math.round((totalApproved / totalRoomRate) * 100))
       : totalApproved > 0
-      ? 100
-      : 0;
+        ? 100
+        : 0;
 
   const stats = [
     {
-      title: titlePrefix ? `${titlePrefix} Room Rate` : "Total Room Rate",
+      title: titlePrefix === "Total" ? "Available Room Balance" : titlePrefix ? `${titlePrefix} Room Balance` : "Available Room Balance",
       value: totalRoomRate,
       subtitle: totalUsers ? `${totalUsers} Users tracked` : "Total requested rent",
       icon: Home,

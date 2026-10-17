@@ -191,8 +191,8 @@ export function ExpenseCreateDialog({
 
       toast.success(
         isAdmin
-          ? "Expense successfully recorded for user!"
-          : "Room rent expense request submitted successfully!"
+          ? "Room rent record successfully created for user!"
+          : "Room rent request submitted successfully!"
       );
       onOpenChange(false);
       onExpenseCreated();
@@ -205,7 +205,7 @@ export function ExpenseCreateDialog({
       setPayAmount("5000");
       setNote("room pay");
     } catch (err: unknown) {
-      toast.error(getApiErrorMessage(err, "Failed to submit expense request."));
+      toast.error(getApiErrorMessage(err, "Failed to submit room rent request."));
     } finally {
       setIsSubmitting(false);
     }
@@ -225,7 +225,7 @@ export function ExpenseCreateDialog({
                   Room Rent Request
                 </DialogTitle>
                 <DialogDescription className="text-xs">
-                  Submit a room rate expense payment request for admin review.
+                  Submit a room rent payment request for admin review.
                 </DialogDescription>
               </div>
             </div>

@@ -83,11 +83,11 @@ export function ExpenseEditDialog({
         note: note.trim(),
       });
 
-      toast.success("Expense details updated successfully.");
+      toast.success("Room rent details updated successfully.");
       onOpenChange(false);
       onUpdated();
     } catch (err: unknown) {
-      toast.error(getApiErrorMessage(err, "Failed to update expense."));
+      toast.error(getApiErrorMessage(err, "Failed to update room rent record."));
     } finally {
       setIsSubmitting(false);
     }
@@ -104,7 +104,7 @@ export function ExpenseEditDialog({
               </div>
               <div>
                 <DialogTitle className="text-lg font-bold">
-                  Edit Expense Request (Admin)
+                  Edit Room Rent Record (Admin)
                 </DialogTitle>
                 <DialogDescription className="text-xs">
                   Update financial amounts, status, and notes for user {expense.user?.name || ""}.

@@ -26,7 +26,7 @@ export const NAV_LINKS = [
     icon: LayoutDashboard,
   },
   {
-    title: "Room Expenses",
+    title: "Room Rent & Collections",
     href: "/expenses",
     icon: IndianRupee,
   },

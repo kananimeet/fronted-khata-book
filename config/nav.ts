@@ -22,7 +22,7 @@ export const navItems: NavItem[] = [
     icon: LayoutDashboard,
   },
   {
-    title: "Room Expenses",
+    title: "Room Rent & Collections",
     href: "/expenses",
     icon: IndianRupee,
   },

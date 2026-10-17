@@ -39,11 +39,11 @@ export function ExpenseDeleteDialog({
     setIsDeleting(true);
     try {
       await deleteExpense(expense.id);
-      toast.success("Expense request deleted successfully.");
+      toast.success("Room rent record deleted successfully.");
       onOpenChange(false);
       onDeleted();
     } catch (err: unknown) {
-      toast.error(getApiErrorMessage(err, "Failed to delete expense."));
+      toast.error(getApiErrorMessage(err, "Failed to delete room rent record."));
     } finally {
       setIsDeleting(false);
     }
@@ -59,7 +59,7 @@ export function ExpenseDeleteDialog({
             </div>
             <div>
               <DialogTitle className="text-lg font-bold">
-                Delete Expense Record
+                Delete Room Rent Record
               </DialogTitle>
               <DialogDescription className="text-xs">
                 This action cannot be undone.
@@ -70,7 +70,7 @@ export function ExpenseDeleteDialog({
 
         <div className="py-3 text-xs space-y-2">
           <p className="text-muted-foreground">
-            Are you sure you want to delete this expense of{" "}
+            Are you sure you want to delete this room rent record of{" "}
             <strong className="text-foreground font-semibold">
               {formatCurrency(expense.total_amount)}
             </strong>{" "}

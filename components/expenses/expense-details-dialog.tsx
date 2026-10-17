@@ -67,7 +67,7 @@ export function ExpenseDetailsDialog({
               </div>
               <div>
                 <DialogTitle className="text-lg font-extrabold tracking-tight text-foreground">
-                  Room Expense Details
+                  Room Rent Details
                 </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground mt-0.5">
                   Invoice ID #{String(expense.id).slice(-6)} • Issued on {formatDate(expense.created_at)}
@@ -105,7 +105,7 @@ export function ExpenseDetailsDialog({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <div className="p-3.5 rounded-2xl border border-violet-500/20 bg-violet-500/5 backdrop-blur-md">
               <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
-                Total Room Rate
+                Total Room Rent
               </div>
               <div className="text-base font-extrabold font-mono text-foreground mt-1">
                 {formatCurrency(total)}
@@ -135,11 +135,10 @@ export function ExpenseDetailsDialog({
                 Remaining Due
               </div>
               <div
-                className={`text-base font-extrabold font-mono mt-1 ${
-                  remaining > 0
+                className={`text-base font-extrabold font-mono mt-1 ${remaining > 0
                     ? "text-amber-600 dark:text-amber-400"
                     : "text-emerald-600 dark:text-emerald-400"
-                }`}
+                  }`}
               >
                 {formatCurrency(remaining)}
               </div>

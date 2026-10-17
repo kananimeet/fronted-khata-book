@@ -66,9 +66,9 @@
       ]
     },
     {
-      "name": "Room Expenses",
+      "name": "Room Rent & Collections",
       "short_name": "Room Rent",
-      "description": "Manage Room Rent and Installments",
+      "description": "Manage Room Rent and Collections",
       "url": "/expenses",
       "icons": [
         {

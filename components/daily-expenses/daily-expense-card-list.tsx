@@ -83,7 +83,7 @@ export function DailyExpenseCardList({
   }
 
   return (
-    <div className="space-y-3.5">
+    <div className="space-y-3.5 max-h-[580px] overflow-y-auto pr-1.5 custom-scrollbar">
       {expenses.map((expense) => {
         const isRoom = expense.expense_type === "room";
         const isPending = expense.status === "PENDING";

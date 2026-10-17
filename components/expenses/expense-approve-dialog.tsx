@@ -58,12 +58,12 @@ export function ExpenseApproveDialog({
       });
 
       toast.success(
-        `Expense request approved! Status updated to ${nextStatus}.`
+        `Payment request approved! Status updated to ${nextStatus}.`
       );
       onOpenChange(false);
       onApproved();
     } catch (err: unknown) {
-      toast.error(getApiErrorMessage(err, "Failed to approve expense request."));
+      toast.error(getApiErrorMessage(err, "Failed to approve payment request."));
     } finally {
       setIsSubmitting(false);
     }
@@ -83,7 +83,7 @@ export function ExpenseApproveDialog({
                   Approve Payment Request
                 </DialogTitle>
                 <DialogDescription className="text-xs">
-                  Review and confirm approval for this expense payment.
+                  Review and confirm approval for this room rent payment.
                 </DialogDescription>
               </div>
             </div>

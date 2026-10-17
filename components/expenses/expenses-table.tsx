@@ -47,7 +47,7 @@ export function ExpensesTable({
       <div className="glass-card rounded-2xl border border-white/60 dark:border-white/10 overflow-hidden shadow-xl">
         <div className="p-12 text-center space-y-3">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-violet-600 border-r-transparent" />
-          <p className="text-xs text-muted-foreground font-medium">Loading expense requests...</p>
+          <p className="text-xs text-muted-foreground font-medium">Loading room rent requests...</p>
         </div>
       </div>
     );
@@ -60,12 +60,12 @@ export function ExpensesTable({
           <Inbox className="h-7 w-7" />
         </div>
         <h3 className="text-base font-semibold text-foreground">
-          No expense requests found
+          No room rent requests found
         </h3>
         <p className="mt-1 text-xs text-muted-foreground max-w-sm">
           {isAdmin
-            ? "No expense payment records match your active search filters."
-            : "You have not submitted any room rate expense payment requests yet."}
+            ? "No room rent payment records match your active search filters."
+            : "You have not submitted any room rent payment requests yet."}
         </p>
       </div>
     );
@@ -73,9 +73,9 @@ export function ExpensesTable({
 
   return (
     <div className="glass-card rounded-2xl shadow-xl border border-white/60 dark:border-white/10 overflow-hidden">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overflow-y-auto max-h-[580px] custom-scrollbar">
         <table className="w-full text-left text-xs">
-          <thead className="bg-muted/40 border-b border-border/50 text-muted-foreground uppercase font-semibold text-[11px] tracking-wider">
+          <thead className="sticky top-0 z-10 bg-slate-100/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-border/60 text-muted-foreground uppercase font-semibold text-[11px] tracking-wider shadow-xs">
             <tr>
               <th className="px-4 py-3.5">User</th>
               <th className="px-4 py-3.5">Purpose / Note</th>

@@ -78,7 +78,7 @@ export default function DashboardPage() {
           setIsLoading(false);
         }
       }
-    } catch {}
+    } catch { }
   }, []);
 
   // Fetch Chart Data dynamically whenever Year or Month changes
@@ -123,10 +123,10 @@ export default function DashboardPage() {
           const dailyItems: any[] = Array.isArray(rawRes?.items)
             ? rawRes.items
             : Array.isArray(rawRes?.data)
-            ? rawRes.data
-            : Array.isArray(rawRes)
-            ? rawRes
-            : [];
+              ? rawRes.data
+              : Array.isArray(rawRes)
+                ? rawRes
+                : [];
 
           if (dailyItems.length > 0) {
             const approvedRoomItems = dailyItems.filter(
@@ -226,8 +226,8 @@ export default function DashboardPage() {
             typeof roomData.meta?.total === "number"
               ? roomData.meta.total
               : typeof roomData.total === "number"
-              ? roomData.total
-              : items.length;
+                ? roomData.total
+                : items.length;
 
           setTotalCount(total);
 
@@ -328,7 +328,7 @@ export default function DashboardPage() {
                 timestamp: Date.now(),
               })
             );
-          } catch {}
+          } catch { }
         }
       } catch (err) {
         console.error("Failed to load live dashboard stats:", err);
@@ -400,8 +400,8 @@ export default function DashboardPage() {
     totalTarget > 0
       ? Math.min(100, Math.round((summary.totalApproved / totalTarget) * 100))
       : summary.totalApproved > 0
-      ? 100
-      : 0;
+        ? 100
+        : 0;
 
   // Extract dynamic sparkline series from real daily trend
   const sparklineRoom = useMemo(() => {
@@ -436,12 +436,12 @@ export default function DashboardPage() {
   // 5 KPI Stat Cards with real live data
   const kpiCards = [
     {
-      title: "Total Room Rate",
+      title: "Available Room Balance",
       value: netRoomRate,
       subtitle:
         dailySpent > 0
-          ? `Cut by ${formatINR(dailySpent)} groceries`
-          : `${totalCount} room contracts`,
+          ? `Net balance after ${formatINR(dailySpent)} expenses`
+          : `${totalCount} active room collections`,
       icon: Home,
       variant: "blue" as const,
       sparklineData: sparklineRoom,
@@ -522,12 +522,12 @@ export default function DashboardPage() {
               </span>
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 font-medium">
-              Welcome back, <span className="font-semibold text-foreground">{userName}</span>! Here is the live summary of room rate expenses, counts, and payments.
+              Welcome back, <span className="font-semibold text-foreground">{userName}</span>! Here is the live summary of room collections, daily grocery expenses, and payments.
             </p>
           </div>
         </div>
 
-        {/* Right Action Controls: Refresh & Room Expenses Button */}
+        {/* Right Action Controls: Refresh & Room Rent & Collections Button */}
         <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
           <Button
             variant="outline"
@@ -539,9 +539,8 @@ export default function DashboardPage() {
             className="h-10 w-10 rounded-xl glass-pill shadow-xs hover:border-violet-500/40"
           >
             <RotateCw
-              className={`h-4 w-4 text-muted-foreground hover:text-foreground ${
-                isRefreshing ? "animate-spin text-violet-600" : ""
-              }`}
+              className={`h-4 w-4 text-muted-foreground hover:text-foreground ${isRefreshing ? "animate-spin text-violet-600" : ""
+                }`}
             />
           </Button>
 
@@ -551,7 +550,7 @@ export default function DashboardPage() {
           >
             <Link href="/expenses">
               <PlusCircle className="h-4 w-4 shrink-0" />
-              <span>Room Expenses</span>
+              <span>Room Rent & Collections</span>
             </Link>
           </Button>
         </div>

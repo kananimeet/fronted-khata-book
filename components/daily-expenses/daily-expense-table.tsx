@@ -106,9 +106,9 @@ export function DailyExpenseTable({
 
   return (
     <div className="glass-card rounded-2xl border border-white/60 dark:border-white/10 overflow-hidden shadow-xl">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overflow-y-auto max-h-[580px] custom-scrollbar">
         <table className="w-full text-left text-xs text-foreground">
-          <thead className="bg-muted/40 text-muted-foreground font-semibold border-b border-border/50 uppercase tracking-wider text-[11px]">
+          <thead className="sticky top-0 z-10 bg-slate-100/95 dark:bg-slate-900/95 backdrop-blur-md text-muted-foreground font-semibold border-b border-border/60 uppercase tracking-wider text-[11px] shadow-xs">
             <tr>
               <th scope="col" className="py-3.5 px-4">
                 Date & Category

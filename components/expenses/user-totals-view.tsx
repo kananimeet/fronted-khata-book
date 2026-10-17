@@ -188,7 +188,7 @@ export function UserTotalsView({
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 text-xs text-left">
                     <div>
                       <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
-                        Room Rate
+                        Room Rent
                       </div>
                       <div className="text-sm font-extrabold font-mono text-foreground mt-0.5">
                         {formatCurrency(item.total_amount)}
@@ -287,7 +287,7 @@ export function UserTotalsView({
                                 <div className="flex items-center gap-4 text-right">
                                   <div>
                                     <div className="text-[10px] text-muted-foreground">
-                                      Room Rate
+                                      Room Rent
                                     </div>
                                     <div className="font-semibold">{formatCurrency(rTotal)}</div>
                                   </div>
