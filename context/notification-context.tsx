@@ -90,6 +90,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         setFcmToken(token);
         // Save token to localStorage for fast access
         try {
+          localStorage.setItem("bachelorsbook_fcm_token", token);
           localStorage.setItem("khatabook_fcm_token", token);
         } catch {}
 
@@ -132,7 +133,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     if (typeof window !== "undefined") {
       // If we already have a cached token in localStorage, sync it immediately to DB
       try {
-        const storedToken = localStorage.getItem("khatabook_fcm_token");
+        const storedToken =
+          localStorage.getItem("bachelorsbook_fcm_token") ||
+          localStorage.getItem("khatabook_fcm_token");
         if (storedToken) {
           setFcmToken(storedToken);
           saveFcmToken(storedToken).catch(() => {});
@@ -145,6 +148,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           if (token) {
             setFcmToken(token);
             try {
+              localStorage.setItem("bachelorsbook_fcm_token", token);
               localStorage.setItem("khatabook_fcm_token", token);
             } catch {}
             await saveFcmToken(token);
@@ -164,7 +168,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       const title =
         payload.notification?.title ||
         payload.data?.title ||
-        "KhataBook Alert";
+        "Bachelors Book Alert";
       const body =
         payload.notification?.body ||
         payload.data?.body ||
@@ -257,7 +261,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const sendTestPush = useCallback(async () => {
     const res = await sendTestNotification(
       "Test Push Notification",
-      "KhataBook Web Push Notification is working smoothly!"
+      "Bachelors Book Web Push Notification is working smoothly!"
     );
     if (res.success) {
       toast.success(res.message, "Push Sent");

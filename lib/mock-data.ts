@@ -64,7 +64,7 @@ export interface DashboardKPISummary {
 export const CURRENT_USER: User = {
   id: "u-1",
   name: "Nirav",
-  email: "nirav@khatabook.app",
+  email: "nirav@bachelorsbook.app",
   initials: "NI",
   role: "ADMIN",
 };

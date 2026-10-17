@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { KhataBookLogo } from "@/components/ui/logo";
+import { BachelorsBookLogo } from "@/components/ui/logo";
 import { useAuth } from "@/context/auth-context";
 
 export const NAV_LINKS = [
@@ -80,7 +80,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse, className }: SidebarPro
           isCollapsed ? "justify-center px-2" : "justify-between"
         )}
       >
-        <KhataBookLogo
+        <BachelorsBookLogo
           size={isCollapsed ? "sm" : "md"}
           showText={!isCollapsed}
           href="/dashboard"

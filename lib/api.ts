@@ -68,6 +68,9 @@ api.interceptors.response.use(
         invalidateCache("expenses");
         if (typeof window !== "undefined") {
           try {
+            localStorage.removeItem("bachelorsbook_daily_expenses_cache");
+            localStorage.removeItem("bachelorsbook_dashboard_cache");
+            localStorage.removeItem("bachelorsbook_room_expenses_cache");
             localStorage.removeItem("khatabook_daily_expenses_cache");
             localStorage.removeItem("khatabook_dashboard_cache");
             localStorage.removeItem("khatabook_room_expenses_cache");
@@ -78,6 +81,8 @@ api.interceptors.response.use(
         invalidateCache("expenses");
         if (typeof window !== "undefined") {
           try {
+            localStorage.removeItem("bachelorsbook_dashboard_cache");
+            localStorage.removeItem("bachelorsbook_room_expenses_cache");
             localStorage.removeItem("khatabook_dashboard_cache");
             localStorage.removeItem("khatabook_room_expenses_cache");
           } catch {}
@@ -87,6 +92,7 @@ api.interceptors.response.use(
         invalidateCache("users");
         if (typeof window !== "undefined") {
           try {
+            localStorage.removeItem("bachelorsbook_users_cache");
             localStorage.removeItem("khatabook_users_cache");
           } catch {}
         }

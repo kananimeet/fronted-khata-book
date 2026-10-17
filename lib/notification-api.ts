@@ -109,7 +109,7 @@ export async function deleteNotification(id: string): Promise<boolean> {
  * POST /notifications/test
  */
 export async function sendTestNotification(
-  title: string = "KhataBook Test Notification",
+  title: string = "Bachelors Book Test Notification",
   body: string = "Testing web push notifications successfully!"
 ): Promise<{ success: boolean; message: string }> {
   try {

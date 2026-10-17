@@ -99,7 +99,9 @@ function ExpensesContent() {
   // Hydrate from localStorage strictly on client post-hydration to prevent SSR mismatch
   useEffect(() => {
     try {
-      const item = localStorage.getItem("khatabook_room_expenses_cache");
+      const item =
+        localStorage.getItem("bachelorsbook_room_expenses_cache") ||
+        localStorage.getItem("khatabook_room_expenses_cache");
       if (item) {
         const cached = JSON.parse(item);
         if (cached?.items && Array.isArray(cached.items) && cached.items.length > 0) {
@@ -292,7 +294,7 @@ function ExpensesContent() {
             if (typeof window !== "undefined") {
               try {
                 localStorage.setItem(
-                  "khatabook_room_expenses_cache",
+                  "bachelorsbook_room_expenses_cache",
                   JSON.stringify({
                     items,
                     total: totalCount,

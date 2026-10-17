@@ -69,9 +69,13 @@ export function clearMutationCaches(): void {
   invalidateCache();
   if (typeof window !== "undefined") {
     try {
+      localStorage.removeItem("bachelorsbook_dashboard_cache");
+      localStorage.removeItem("bachelorsbook_room_expenses_cache");
+      localStorage.removeItem("bachelorsbook_daily_expenses_cache");
       localStorage.removeItem("khatabook_dashboard_cache");
       localStorage.removeItem("khatabook_room_expenses_cache");
       localStorage.removeItem("khatabook_daily_expenses_cache");
+      window.dispatchEvent(new Event("bachelorsbook_data_updated"));
       window.dispatchEvent(new Event("khatabook_data_updated"));
     } catch {
       // Ignore storage errors

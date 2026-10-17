@@ -49,7 +49,9 @@ export default function UsersPage() {
   // Hydrate from localStorage strictly on client post-hydration to prevent SSR mismatch
   useEffect(() => {
     try {
-      const item = localStorage.getItem("khatabook_users_cache");
+      const item =
+        localStorage.getItem("bachelorsbook_users_cache") ||
+        localStorage.getItem("khatabook_users_cache");
       if (item) {
         const cached = JSON.parse(item);
         if (cached?.users && Array.isArray(cached.users) && cached.users.length > 0) {
@@ -123,7 +125,7 @@ export default function UsersPage() {
             if (typeof window !== "undefined") {
               try {
                 localStorage.setItem(
-                  "khatabook_users_cache",
+                  "bachelorsbook_users_cache",
                   JSON.stringify({
                     users: data.users,
                     total: data.total,

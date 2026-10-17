@@ -21,8 +21,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KhataBook - Room & Expense Management",
-  description: "Modern Room Rate and Daily Expense Management Portal for KhataBook",
+  title: "Bachelors Book - Room & Expense Management",
+  description: "Modern Room Rate and Daily Expense Management Portal for Bachelors Book",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "KhataBook",
+    title: "Bachelors Book",
   },
 };
 

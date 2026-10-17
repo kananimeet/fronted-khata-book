@@ -22,10 +22,10 @@ const sizeMap = {
   xl: { icon: "h-20 w-20", img: 80, text: "text-2xl", sub: "text-sm" },
 };
 
-export function KhataBookLogo({
+export function BachelorsBookLogo({
   size = "md",
   showText = true,
-  subtitle = "Room & Expense Hub",
+  subtitle = "Track • Manage • Share",
   className,
   iconClassName,
   href,
@@ -38,14 +38,14 @@ export function KhataBookLogo({
       <div
         className={cn(
           "relative shrink-0 rounded-2xl p-0.5 overflow-hidden transition-all duration-300",
-          "shadow-md shadow-violet-500/20 group-hover:shadow-lg group-hover:shadow-violet-500/35 group-hover:scale-105",
+          "shadow-md shadow-emerald-500/20 group-hover:shadow-lg group-hover:shadow-emerald-500/35 group-hover:scale-105",
           currentSize.icon,
           iconClassName
         )}
       >
         <Image
-          src="/icons/logo.svg"
-          alt="KhataBook Logo"
+          src="/icons/logo.png"
+          alt="Bachelors Book Logo"
           width={currentSize.img}
           height={currentSize.img}
           priority
@@ -59,13 +59,13 @@ export function KhataBookLogo({
           <div className="flex items-center gap-1.5">
             <span
               className={cn(
-                "font-extrabold tracking-tight bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 dark:from-violet-400 dark:via-purple-300 dark:to-fuchsia-400 bg-clip-text text-transparent truncate",
+                "font-extrabold tracking-tight text-slate-900 dark:text-white truncate",
                 currentSize.text
               )}
             >
-              KhataBook
+              Bachelors<span className="text-emerald-600 dark:text-emerald-400">-Book</span>
             </span>
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-fuchsia-500 animate-pulse" />
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
           </div>
           {subtitle && (
             <span
@@ -92,3 +92,6 @@ export function KhataBookLogo({
 
   return content;
 }
+
+// Backward compatibility alias
+export const KhataBookLogo = BachelorsBookLogo;

@@ -40,6 +40,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Clear any previous session caches
     if (typeof window !== "undefined") {
       try {
+        localStorage.removeItem("bachelorsbook_daily_expenses_cache");
+        localStorage.removeItem("bachelorsbook_dashboard_cache");
+        localStorage.removeItem("bachelorsbook_room_expenses_cache");
+        localStorage.removeItem("bachelorsbook_users_cache");
         localStorage.removeItem("khatabook_daily_expenses_cache");
         localStorage.removeItem("khatabook_dashboard_cache");
         localStorage.removeItem("khatabook_room_expenses_cache");
@@ -57,6 +61,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     if (typeof window !== "undefined") {
       try {
+        localStorage.removeItem("bachelorsbook_daily_expenses_cache");
+        localStorage.removeItem("bachelorsbook_dashboard_cache");
+        localStorage.removeItem("bachelorsbook_room_expenses_cache");
+        localStorage.removeItem("bachelorsbook_users_cache");
         localStorage.removeItem("khatabook_daily_expenses_cache");
         localStorage.removeItem("khatabook_dashboard_cache");
         localStorage.removeItem("khatabook_room_expenses_cache");

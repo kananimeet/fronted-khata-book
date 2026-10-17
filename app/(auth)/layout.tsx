@@ -1,6 +1,6 @@
 import React from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { KhataBookLogo } from "@/components/ui/logo";
+import { BachelorsBookLogo } from "@/components/ui/logo";
 
 export default function AuthLayout({
   children,
@@ -35,7 +35,7 @@ export default function AuthLayout({
 
       {/* Brand Logo Header */}
       <div className="relative z-10 mb-4 flex justify-center">
-        <KhataBookLogo size="lg" showText={true} subtitle="Smart Room & Expense Portal" href="/dashboard" />
+        <BachelorsBookLogo size="lg" showText={true} subtitle="Smart Room & Expense Portal" href="/dashboard" />
       </div>
 
       {/* Main card container */}
@@ -43,7 +43,7 @@ export default function AuthLayout({
 
       {/* Bottom Footer */}
       <div className="relative z-10 mt-auto py-4 text-center text-xs text-muted-foreground/80 flex items-center justify-center gap-2">
-        <span>© {new Date().getFullYear()} KhataBook</span>
+        <span>© {new Date().getFullYear()} Bachelors Book</span>
         <span>•</span>
         <span className="font-medium">Secure Financial Platform</span>
       </div>

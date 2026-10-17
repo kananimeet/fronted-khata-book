@@ -40,7 +40,7 @@ const firebaseConfig = {
 const recentNotifications = new Map();
 
 function displayPushNotification(title, options) {
-  const tag = options.tag || `khata-${Date.now()}`;
+  const tag = options.tag || `bachelors-${Date.now()}`;
   const now = Date.now();
 
   // If same tag showed within 5 seconds, suppress duplicate
@@ -59,7 +59,7 @@ function displayPushNotification(title, options) {
     recentNotifications.delete(oldestKey);
   }
 
-  return self.registration.showNotification(title || 'Khata Book', options);
+  return self.registration.showNotification(title || 'Bachelors Book', options);
 }
 
 // Initialize Firebase Messaging
@@ -74,7 +74,7 @@ try {
     const title =
       payload.notification?.title ||
       payload.data?.title ||
-      'Khata Book';
+      'Bachelors Book';
 
     const body =
       payload.notification?.body ||
@@ -100,7 +100,7 @@ try {
     const tag =
       payload.data?.type ||
       payload.notification?.tag ||
-      `khatabook-${payload.data?.expense_id || Date.now()}`;
+      `bachelorsbook-${payload.data?.expense_id || Date.now()}`;
 
     const options = {
       body,
@@ -127,12 +127,12 @@ try {
 self.addEventListener('push', (event) => {
   console.log('[firebase-messaging-sw.js] Native push event fired');
 
-  let title = 'Khata Book';
+  let title = 'Bachelors Book';
   let body = 'You have a new update';
   let icon = '/icons/icon-192x192.png';
   let badge = '/icons/icon-192x192.png';
   let link = '/expenses';
-  let tag = `khatabook-${Date.now()}`;
+  let tag = `bachelorsbook-${Date.now()}`;
   let extraData = {};
 
   if (event.data) {
@@ -148,7 +148,7 @@ self.addEventListener('push', (event) => {
       icon = notif.icon || data.icon || icon;
       badge = notif.badge || data.badge || badge;
       link = data.link || data.url || payload.fcmOptions?.link || link;
-      tag = data.type || notif.tag || `khatabook-${data.expense_id || Date.now()}`;
+      tag = data.type || notif.tag || `bachelorsbook-${data.expense_id || Date.now()}`;
       extraData = data;
     } catch {
       // If data is plain text
@@ -188,7 +188,7 @@ self.addEventListener('notificationclick', (event) => {
         }
       }
 
-      // If any KhataBook window is open, focus and navigate
+      // If any Bachelors Book window is open, focus and navigate
       for (const client of windowClients) {
         if ('focus' in client) {
           client.focus();

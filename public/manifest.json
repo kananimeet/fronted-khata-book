@@ -1,7 +1,7 @@
 {
-  "name": "KhataBook - Room & Expense Management",
-  "short_name": "KhataBook",
-  "description": "Smart Room Rate and Daily Expense Management Portal for KhataBook",
+  "name": "Bachelors Book - Room & Expense Management",
+  "short_name": "Bachelors Book",
+  "description": "Smart Room Rate and Daily Expense Management Portal for Bachelors Book",
   "id": "/",
   "start_url": "/dashboard",
   "scope": "/",
@@ -56,7 +56,7 @@
     {
       "name": "Dashboard",
       "short_name": "Dashboard",
-      "description": "Open KhataBook Dashboard Overview",
+      "description": "Open Bachelors Book Dashboard Overview",
       "url": "/dashboard",
       "icons": [
         {

@@ -1,5 +1,5 @@
 /**
- * Currency and formatting utilities for KhataBook
+ * Currency and formatting utilities for Bachelors Book
  * Formats numbers into Indian Rupee (INR) representation.
  */
 

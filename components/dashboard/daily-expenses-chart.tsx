@@ -226,7 +226,9 @@ export function DailyExpensesChart() {
   useEffect(() => {
     setMounted(true);
     try {
-      const item = localStorage.getItem(`khatabook_chart_v2_${selectedYear}_${selectedMonth}`);
+      const item =
+        localStorage.getItem(`bachelorsbook_chart_v2_${selectedYear}_${selectedMonth}`) ||
+        localStorage.getItem(`khatabook_chart_v2_${selectedYear}_${selectedMonth}`);
       if (item) {
         const cached = JSON.parse(item);
         if (cached) {
@@ -249,7 +251,7 @@ export function DailyExpensesChart() {
         if (typeof window !== "undefined") {
           try {
             localStorage.setItem(
-              `khatabook_chart_v2_${selectedYear}_${selectedMonth}`,
+              `bachelorsbook_chart_v2_${selectedYear}_${selectedMonth}`,
               JSON.stringify(data)
             );
           } catch {}

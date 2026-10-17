@@ -236,7 +236,7 @@ async function main() {
     .png()
     .toFile(path.join(publicDir, "favicon.png"));
 
-  console.log("All modern KhataBook logo icons successfully generated!");
+  console.log("All modern Bachelors Book logo icons successfully generated!");
 }
 
 main().catch(console.error);

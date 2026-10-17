@@ -10,7 +10,7 @@ import { UserNav } from "@/components/dashboard/user-nav";
 import { NAV_LINKS } from "@/components/layout/Sidebar";
 import { useAuth } from "@/context/auth-context";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { KhataBookLogo } from "@/components/ui/logo";
+import { BachelorsBookLogo } from "@/components/ui/logo";
 
 interface HeaderProps {
   isSidebarCollapsed: boolean;
@@ -75,7 +75,7 @@ export function Header({
         {/* Dynamic Page Title */}
         <div className="flex items-center gap-2.5">
           <div className="md:hidden flex items-center">
-            <KhataBookLogo size="xs" showText={false} href="/dashboard" />
+            <BachelorsBookLogo size="xs" showText={false} href="/dashboard" />
           </div>
           <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-foreground">
             {pageTitle}

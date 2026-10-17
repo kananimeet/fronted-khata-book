@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "KhataBook - Room & Expense Management",
-    short_name: "KhataBook",
-    description: "Smart Room Rate and Daily Expense Management Portal for KhataBook",
+    name: "Bachelors Book - Room & Expense Management",
+    short_name: "Bachelors Book",
+    description: "Smart Room Rate and Daily Expense Management Portal for Bachelors Book",
     start_url: "/dashboard",
     scope: "/",
     display: "standalone",
@@ -53,7 +53,7 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         name: "Dashboard",
         short_name: "Dashboard",
-        description: "Open KhataBook Dashboard Overview",
+        description: "Open Bachelors Book Dashboard Overview",
         url: "/dashboard",
         icons: [{ src: "/icons/icon-192x192.png", sizes: "192x192" }],
       },

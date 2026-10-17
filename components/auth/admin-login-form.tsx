@@ -71,7 +71,7 @@ export function AdminLoginForm() {
     try {
       const storedFcmToken =
         typeof window !== "undefined"
-          ? localStorage.getItem("khatabook_fcm_token")
+          ? localStorage.getItem("bachelorsbook_fcm_token") || localStorage.getItem("khatabook_fcm_token")
           : null;
 
       const response = await api.post<LoginResponse>(
@@ -116,7 +116,7 @@ export function AdminLoginForm() {
               Restricted Area
             </div>
             <CardTitle className="text-2xl font-bold tracking-tight text-foreground">
-              KhataBook Admin Portal
+              Bachelors Book Admin Portal
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
               Sign in with your administrative account to access room management and member ledgers
@@ -147,7 +147,7 @@ export function AdminLoginForm() {
                 <Input
                   id="admin-email"
                   type="email"
-                  placeholder="admin@khatabook.com"
+                  placeholder="admin@bachelorsbook.app"
                   autoComplete="email"
                   autoFocus
                   disabled={isLoading}

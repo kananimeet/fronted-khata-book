@@ -211,7 +211,7 @@ export function LoginForm() {
     try {
       const storedFcmToken =
         typeof window !== "undefined"
-          ? localStorage.getItem("khatabook_fcm_token")
+          ? localStorage.getItem("bachelorsbook_fcm_token") || localStorage.getItem("khatabook_fcm_token")
           : null;
 
       const response = await api.post<LoginResponse>(
@@ -268,10 +268,10 @@ export function LoginForm() {
               </div>
             ) : (
               <div className="relative group cursor-pointer animate-gentle-bounce">
-                <div className="relative h-20 w-20 rounded-2xl overflow-hidden shadow-xl ring-4 ring-violet-500/25 border-2 border-background bg-gradient-to-tr from-violet-600 via-purple-600 to-fuchsia-600 p-1.5 transition-transform duration-300 group-hover:scale-105">
+                <div className="relative h-20 w-20 rounded-2xl overflow-hidden shadow-xl ring-4 ring-emerald-500/25 border-2 border-background bg-gradient-to-tr from-emerald-600 via-teal-600 to-emerald-500 p-1.5 transition-transform duration-300 group-hover:scale-105">
                   <Image
-                    src="/icons/logo.svg"
-                    alt="KhataBook Logo"
+                    src="/icons/logo.png"
+                    alt="Bachelors Book Logo"
                     width={80}
                     height={80}
                     priority
@@ -293,7 +293,7 @@ export function LoginForm() {
                   ? "Create Password"
                   : step === "STEP_2B_LOGIN"
                   ? `Welcome, ${checkedUser?.name?.split(" ")[0] || "User"}!`
-                  : "KhataBook Login"}
+                  : "Bachelors Book Login"}
               </span>
               {step !== "STEP_2A_SETUP" && (
                 <span className="inline-block text-xl">✨</span>
@@ -325,7 +325,7 @@ export function LoginForm() {
                 </Avatar>
                 <div className="min-w-0 text-left">
                   <p className="text-xs font-semibold text-foreground truncate">
-                    {checkedUser?.name || "KhataBook User"}
+                    {checkedUser?.name || "Bachelors Book User"}
                   </p>
                   <p className="text-[11px] text-muted-foreground truncate">{checkedEmail}</p>
                 </div>
@@ -676,7 +676,7 @@ export function LoginForm() {
                     Signing in...
                   </>
                 ) : (
-                  "Sign In to KhataBook"
+                  "Sign In to Bachelors Book"
                 )}
               </Button>
 

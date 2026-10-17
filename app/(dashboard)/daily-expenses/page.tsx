@@ -86,7 +86,9 @@ export default function DailyExpensesPage() {
   // Hydrate from localStorage strictly on client post-hydration to prevent SSR mismatch
   useEffect(() => {
     try {
-      const item = localStorage.getItem("khatabook_daily_expenses_cache");
+      const item =
+        localStorage.getItem("bachelorsbook_daily_expenses_cache") ||
+        localStorage.getItem("khatabook_daily_expenses_cache");
       if (item) {
         const cached = JSON.parse(item);
         if (cached?.items && Array.isArray(cached.items) && cached.items.length > 0) {
@@ -190,7 +192,7 @@ export default function DailyExpensesPage() {
           if (typeof window !== "undefined") {
             try {
               localStorage.setItem(
-                "khatabook_daily_expenses_cache",
+                "bachelorsbook_daily_expenses_cache",
                 JSON.stringify({
                   items: res.items,
                   summary: res.summary,

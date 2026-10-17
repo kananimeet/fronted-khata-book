@@ -172,7 +172,7 @@ export function UserCreateDialog({
             <DialogTitle className="text-xl font-bold">Add New User</DialogTitle>
           </div>
           <DialogDescription className="text-sm text-muted-foreground">
-            Register a new client or team member to access the KhataBook portal.
+            Register a new client or team member to access the Bachelors Book portal.
           </DialogDescription>
         </DialogHeader>
 

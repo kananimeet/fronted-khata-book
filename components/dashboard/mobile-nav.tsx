@@ -7,7 +7,7 @@ import { BookOpen } from "lucide-react";
 
 import { navItems } from "@/config/nav";
 import { cn } from "@/lib/utils";
-import { KhataBookLogo } from "@/components/ui/logo";
+import { BachelorsBookLogo } from "@/components/ui/logo";
 import { useAuth } from "@/context/auth-context";
 import {
   Sheet,
@@ -37,7 +37,7 @@ export function MobileNav({ open, onOpenChange }: MobileNavProps) {
         <SheetHeader className="p-4 border-b border-border/50">
           <SheetTitle asChild>
             <div className="flex items-center">
-              <KhataBookLogo size="sm" showText={true} />
+              <BachelorsBookLogo size="sm" showText={true} />
             </div>
           </SheetTitle>
         </SheetHeader>

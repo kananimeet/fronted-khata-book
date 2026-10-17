@@ -15,7 +15,10 @@ export function NotificationPermissionBanner() {
     setIsMounted(true);
     // Check if dismissed in this browser session
     try {
-      if (sessionStorage.getItem("khatabook_notif_banner_dismissed") === "true") {
+      if (
+        sessionStorage.getItem("bachelorsbook_notif_banner_dismissed") === "true" ||
+        sessionStorage.getItem("khatabook_notif_banner_dismissed") === "true"
+      ) {
         setIsDismissed(true);
       }
     } catch {}
@@ -40,6 +43,7 @@ export function NotificationPermissionBanner() {
   const handleDismiss = () => {
     setIsDismissed(true);
     try {
+      sessionStorage.setItem("bachelorsbook_notif_banner_dismissed", "true");
       sessionStorage.setItem("khatabook_notif_banner_dismissed", "true");
     } catch {}
   };

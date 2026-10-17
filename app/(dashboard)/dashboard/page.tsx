@@ -26,7 +26,8 @@ import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { Transaction, ExpenseCategory, ExpenseStatus } from "@/lib/mock-data";
 import { formatINR } from "@/lib/format";
 
-const DASHBOARD_CACHE_KEY = "khatabook_dashboard_cache_v3";
+const DASHBOARD_CACHE_KEY = "bachelorsbook_dashboard_cache_v3";
+const OLD_DASHBOARD_CACHE_KEY = "khatabook_dashboard_cache_v3";
 
 const MONTH_NAMES = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -65,7 +66,9 @@ export default function DashboardPage() {
   // Hydrate from localStorage on client mount for instant render
   useEffect(() => {
     try {
-      const item = localStorage.getItem(DASHBOARD_CACHE_KEY);
+      const item =
+        localStorage.getItem(DASHBOARD_CACHE_KEY) ||
+        localStorage.getItem(OLD_DASHBOARD_CACHE_KEY);
       if (item) {
         const cached = JSON.parse(item);
         if (cached) {
@@ -348,8 +351,10 @@ export default function DashboardPage() {
       fetchDashboardData(true);
     };
     if (typeof window !== "undefined") {
+      window.addEventListener("bachelorsbook_data_updated", handleDataUpdated);
       window.addEventListener("khatabook_data_updated", handleDataUpdated);
       return () => {
+        window.removeEventListener("bachelorsbook_data_updated", handleDataUpdated);
         window.removeEventListener("khatabook_data_updated", handleDataUpdated);
       };
     }
