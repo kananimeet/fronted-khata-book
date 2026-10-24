@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatDate } from "@/lib/utils";
 
 interface UsersTableProps {
   users: User[];
@@ -47,18 +48,7 @@ export function UsersTable({
     return name.slice(0, 2).toUpperCase();
   };
 
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return "—";
-    try {
-      return new Date(dateStr).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-    } catch {
-      return dateStr;
-    }
-  };
+
 
   // Skeleton rows while loading
   if (isLoading) {

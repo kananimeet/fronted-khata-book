@@ -7,6 +7,8 @@ import { ExpenseStatusBadge } from "./expense-status-badge";
 import { ExpenseStats } from "./expense-stats";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { getImageUrl } from "@/lib/image";
 import {
   Search,
   RotateCw,
@@ -159,11 +161,20 @@ export function UserTotalsView({
                 >
                   {/* User Profile */}
                   <div className="flex items-center gap-3.5 min-w-[220px]">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white font-bold text-sm shrink-0 shadow-md shadow-violet-500/25">
-                      {item.user.name?.charAt(0).toUpperCase() || (
-                        <UserIcon className="h-5 w-5" />
+                    <Avatar className="h-11 w-11 rounded-2xl ring-1 ring-border/50 shrink-0 shadow-md shadow-violet-500/10">
+                      {item.user.profile_picture && (
+                        <AvatarImage
+                          src={getImageUrl(item.user.profile_picture, "")}
+                          alt={item.user.name}
+                          className="object-cover rounded-2xl"
+                        />
                       )}
-                    </div>
+                      <AvatarFallback className="rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 text-white font-bold text-sm">
+                        {item.user.name?.charAt(0).toUpperCase() || (
+                          <UserIcon className="h-5 w-5" />
+                        )}
+                      </AvatarFallback>
+                    </Avatar>
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-foreground text-sm">

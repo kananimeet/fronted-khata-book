@@ -6,7 +6,7 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { Home, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
 
 interface ExpenseStatsProps {
-  totalRoomRate: number;
+  totalRoomRate?: number;
   totalApproved: number;
   totalPending: number;
   totalRemaining: number;
@@ -30,19 +30,6 @@ export function ExpenseStats({
         : 0;
 
   const stats = [
-    {
-      title: titlePrefix === "Total" ? "Available Room Balance" : titlePrefix ? `${titlePrefix} Room Balance` : "Available Room Balance",
-      value: totalRoomRate,
-      subtitle: totalUsers ? `${totalUsers} Users tracked` : "Total requested rent",
-      icon: Home,
-      variant: "blue" as const,
-      sparklineData: [
-        totalRoomRate * 0.85,
-        totalRoomRate * 0.9,
-        totalRoomRate * 0.95,
-        totalRoomRate,
-      ],
-    },
     {
       title: titlePrefix ? `${titlePrefix} Approved` : "Approved Paid",
       value: totalApproved,
@@ -75,7 +62,7 @@ export function ExpenseStats({
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {stats.map((stat, idx) => (
         <StatCard
           key={stat.title}

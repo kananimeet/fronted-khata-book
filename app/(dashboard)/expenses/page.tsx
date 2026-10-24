@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useState, useEffect, useCallback, useTransition } from "react";
+import React, { Suspense, useState, useEffect, useCallback, useTransition, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Receipt,
@@ -14,6 +14,10 @@ import {
   LayoutList,
   Users,
   IndianRupee,
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  RotateCcw,
 } from "lucide-react";
 
 import { useAuth } from "@/context/auth-context";
@@ -45,12 +49,27 @@ import { ExpenseRejectDialog } from "@/components/expenses/expense-reject-dialog
 import { ExpenseEditDialog } from "@/components/expenses/expense-edit-dialog";
 import { ExpenseDeleteDialog } from "@/components/expenses/expense-delete-dialog";
 
+const MONTH_NAMES = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+];
+
+const MONTH_NAMES_FULL = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
 function ExpensesContent() {
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [, startTransition] = useTransition();
+
+  const currentDate = useMemo(() => new Date(), []);
+  const [selectedYear, setSelectedYear] = useState<number>(currentDate.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentDate.getMonth()); // 0-indexed
+  const [isAllTime, setIsAllTime] = useState<boolean>(false);
 
   const isAdmin = currentUser?.role?.toUpperCase() === "ADMIN";
 
@@ -95,6 +114,11 @@ function ExpensesContent() {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+
+  const isCurrentMonthSelected =
+    !isAllTime &&
+    selectedYear === currentDate.getFullYear() &&
+    selectedMonth === currentDate.getMonth();
 
   // Hydrate from localStorage strictly on client post-hydration to prevent SSR mismatch
   useEffect(() => {
@@ -169,6 +193,37 @@ function ExpensesContent() {
     return summary;
   }, []);
 
+  // Month navigation handlers
+  const handlePrevMonth = () => {
+    setIsAllTime(false);
+    if (selectedMonth === 0) {
+      setSelectedMonth(11);
+      setSelectedYear((y) => y - 1);
+    } else {
+      setSelectedMonth((m) => m - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    setIsAllTime(false);
+    if (selectedMonth === 11) {
+      setSelectedMonth(0);
+      setSelectedYear((y) => y + 1);
+    } else {
+      setSelectedMonth((m) => m + 1);
+    }
+  };
+
+  const handleResetMonth = () => {
+    setSelectedMonth(currentDate.getMonth());
+    setSelectedYear(currentDate.getFullYear());
+    setIsAllTime(false);
+  };
+
+  const handleToggleAllTime = () => {
+    setIsAllTime((prev) => !prev);
+  };
+
   // Fetch Expenses List
   const fetchExpensesList = useCallback(
     async (
@@ -187,8 +242,8 @@ function ExpensesContent() {
           overrideStatus !== undefined ? overrideStatus : statusFilter;
 
         const params: Record<string, string | number> = {
-          page,
-          limit: pageSize,
+          page: isAllTime ? page : 1,
+          limit: isAllTime ? pageSize : 500,
         };
 
         if (activeSearch.trim()) {
@@ -202,7 +257,6 @@ function ExpensesContent() {
         const data = await getExpenses(params, showRefreshSpinner);
 
         if (data) {
-          // Extract items: backend returns { items: [...], meta: {...}, summary: {...} }
           let items: Expense[] = [];
           if (Array.isArray(data)) {
             items = data;
@@ -216,50 +270,62 @@ function ExpensesContent() {
             items = data.rows;
           }
 
-          // Total count from meta or total property
-          const totalCount =
-            typeof data.meta?.total === "number"
+          // Filter by selected month if not in All Time view
+          let displayItems = items;
+          if (!isAllTime) {
+            displayItems = items.filter((item) => {
+              const raw = item.created_at;
+              if (!raw) return false;
+              const d = new Date(raw);
+              if (!isNaN(d.getTime())) {
+                return (
+                  d.getFullYear() === selectedYear && d.getMonth() === selectedMonth
+                );
+              }
+              const parts = String(raw).split("T")[0].split("-");
+              if (parts.length >= 2) {
+                return (
+                  parseInt(parts[0], 10) === selectedYear &&
+                  parseInt(parts[1], 10) - 1 === selectedMonth
+                );
+              }
+              return false;
+            });
+          }
+
+          const totalCount = isAllTime
+            ? typeof data.meta?.total === "number"
               ? data.meta.total
               : typeof data.total === "number"
               ? data.total
-              : typeof data.totalCount === "number"
-              ? data.totalCount
-              : items.length;
+              : items.length
+            : displayItems.length;
 
-          // Page number
-          const pageNum =
-            typeof data.meta?.page === "number"
-              ? data.meta.page
-              : typeof data.page === "number"
-              ? data.page
-              : page;
-
-          // Total pages
-          const pagesCount =
-            typeof data.meta?.totalPages === "number"
+          const pagesCount = isAllTime
+            ? typeof data.meta?.totalPages === "number"
               ? data.meta.totalPages
               : typeof data.totalPages === "number"
               ? data.totalPages
-              : Math.max(1, Math.ceil(totalCount / pageSize));
+              : Math.max(1, Math.ceil(totalCount / pageSize))
+            : Math.max(1, Math.ceil(displayItems.length / pageSize));
 
           startTransition(() => {
-            setExpenses(items);
+            setExpenses(displayItems);
             setTotalExpenses(totalCount);
-            setCurrentPage(pageNum);
+            setCurrentPage(page);
             setTotalPages(pagesCount);
           });
 
-          // Include any pending installment amounts from items
-          const additionalPendingInstallments = items.reduce((acc, it) => {
-            if (it.status === "PENDING") return acc;
-            const p = it.payments?.find((pay) => pay.status === "PENDING");
-            if (p) return acc + (Number(p.amount) || 0);
-            return acc;
-          }, 0);
-
-          // Summary stats (supports both totalRoomRate and totalRoomRateAmount naming)
+          // Summary stats
           let currentSummary = null;
-          if (data.summary) {
+          if (isAllTime && data.summary) {
+            const additionalPendingInstallments = items.reduce((acc, it) => {
+              if (it.status === "PENDING") return acc;
+              const p = it.payments?.find((pay) => pay.status === "PENDING");
+              if (p) return acc + (Number(p.amount) || 0);
+              return acc;
+            }, 0);
+
             const rawPending =
               Number(
                 data.summary.totalPending ??
@@ -286,11 +352,11 @@ function ExpensesContent() {
             };
             setSummaryStats(currentSummary);
           } else {
-            currentSummary = calculateClientSummary(items);
+            currentSummary = calculateClientSummary(displayItems);
           }
 
           // Cache first page default list for instant display next time
-          if (!activeSearch.trim() && activeStatus === "ALL" && page === 1) {
+          if (!activeSearch.trim() && activeStatus === "ALL" && page === 1 && isAllTime) {
             if (typeof window !== "undefined") {
               try {
                 localStorage.setItem(
@@ -313,7 +379,15 @@ function ExpensesContent() {
         setIsRefreshing(false);
       }
     },
-    [debouncedSearch, statusFilter, toast, calculateClientSummary]
+    [
+      debouncedSearch,
+      statusFilter,
+      toast,
+      calculateClientSummary,
+      isAllTime,
+      selectedYear,
+      selectedMonth,
+    ]
   );
 
   // Fetch User Totals (Admin View)
@@ -325,12 +399,92 @@ function ExpensesContent() {
       try {
         const data = await getUserExpenseTotals(force);
         if (data) {
-          const usersList =
+          let usersList: UserExpenseTotalsItem[] =
             data.users ||
             data.items ||
             (Array.isArray(data) ? data : []);
+
+          if (!isAllTime) {
+            usersList = usersList.map((u) => {
+              const monthRequests = (u.requests || []).filter((exp: Expense) => {
+                const raw = exp.created_at;
+                if (!raw) return false;
+                const d = new Date(raw);
+                if (!isNaN(d.getTime())) {
+                  return (
+                    d.getFullYear() === selectedYear &&
+                    d.getMonth() === selectedMonth
+                  );
+                }
+                const parts = String(raw).split("T")[0].split("-");
+                if (parts.length >= 2) {
+                  return (
+                    parseInt(parts[0], 10) === selectedYear &&
+                    parseInt(parts[1], 10) - 1 === selectedMonth
+                  );
+                }
+                return false;
+              });
+
+              let approved = 0;
+              let pending = 0;
+              let remaining = 0;
+              let roomRent = 0;
+
+              monthRequests.forEach((exp: Expense) => {
+                if (exp.status === "COMPLETE" || exp.status === "REMAINING") {
+                  roomRent += Number(exp.total_amount) || 0;
+                  remaining += Number(exp.remaining_amount) || 0;
+                }
+                approved += Number(exp.paid_amount) || 0;
+                if (exp.status === "PENDING") {
+                  pending += Number(exp.pay_amount) || 0;
+                } else {
+                  const pendingP = exp.payments?.find((p: any) => p.status === "PENDING");
+                  if (pendingP) pending += Number(pendingP.amount) || 0;
+                }
+              });
+
+              return {
+                ...u,
+                requests: monthRequests,
+                total: approved,
+                total_amount: roomRent,
+                total_approved: approved,
+                total_pending: pending,
+                total_remaining: remaining,
+              };
+            });
+
+            const gApproved = usersList.reduce(
+              (sum, u) => sum + (Number(u.total_approved) || 0),
+              0
+            );
+            const gPending = usersList.reduce(
+              (sum, u) => sum + (Number(u.total_pending) || 0),
+              0
+            );
+            const gRemaining = usersList.reduce(
+              (sum, u) => sum + (Number(u.total_remaining) || 0),
+              0
+            );
+            const gRoom = usersList.reduce(
+              (sum, u) => sum + (Number(u.total_amount) || 0),
+              0
+            );
+
+            setGrandSummary({
+              grandTotalRoomRate: gRoom,
+              grandTotalApproved: gApproved,
+              grandTotalPending: gPending,
+              grandTotalRemaining: gRemaining,
+              totalUsers: usersList.length,
+            });
+          } else {
+            setGrandSummary(data.grandSummary || null);
+          }
+
           setUserTotals(usersList);
-          setGrandSummary(data.grandSummary || null);
         }
       } catch (err: unknown) {
         toast.error(getApiErrorMessage(err, "Failed to load user totals dashboard."));
@@ -338,7 +492,7 @@ function ExpensesContent() {
         setIsLoadingTotals(false);
       }
     },
-    [isAdmin, toast]
+    [isAdmin, toast, isAllTime, selectedYear, selectedMonth]
   );
 
   // Initial and reactive data fetching
@@ -348,7 +502,18 @@ function ExpensesContent() {
     } else if (activeTab === "totals" && isAdmin) {
       fetchUserTotals();
     }
-  }, [currentPage, debouncedSearch, statusFilter, activeTab, isAdmin, fetchExpensesList, fetchUserTotals]);
+  }, [
+    currentPage,
+    debouncedSearch,
+    statusFilter,
+    activeTab,
+    isAdmin,
+    selectedYear,
+    selectedMonth,
+    isAllTime,
+    fetchExpensesList,
+    fetchUserTotals,
+  ]);
 
   // Tab switch handler
   const handleTabChange = (tab: "requests" | "totals") => {
@@ -407,7 +572,7 @@ function ExpensesContent() {
               <IndianRupee className="h-6 w-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                   {isAdmin
                     ? "Room Rent & Collection Management"
@@ -427,38 +592,100 @@ function ExpensesContent() {
                     </span>
                   )}
                 </Badge>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
+                  <Calendar className="h-3 w-3" />
+                  {isAllTime
+                    ? "All Time"
+                    : `${MONTH_NAMES[selectedMonth]} ${selectedYear}`}
+                </span>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 font-medium">
-                {isAdmin
-                  ? "Track member room rent collections, approve installment payments, and view real-time totals."
-                  : "Submit room rent requests, pay remaining balances, and view your payment history."}
+                {isAllTime
+                  ? "Viewing all room rent collections and balances across all time."
+                  : `Live summary & room collections for ${MONTH_NAMES_FULL[selectedMonth]} ${selectedYear}.`}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
+        {/* Action Controls: Month Navigator, Refresh & Create Request */}
+        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto flex-wrap">
+          {/* Month Selector */}
+          <div className="flex items-center p-1 rounded-xl glass-pill border border-white/60 dark:border-white/10 shadow-xs">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handlePrevMonth}
+              title="Previous Month"
+              aria-label="Previous Month"
+              className="h-8 w-8 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 cursor-pointer"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            <button
+              type="button"
+              onClick={handleToggleAllTime}
+              title={isAllTime ? "Switch to monthly view" : "Switch to all-time view"}
+              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-foreground cursor-pointer hover:opacity-80 transition-opacity"
+            >
+              <Calendar className="h-3.5 w-3.5 text-violet-500" />
+              <span>
+                {isAllTime
+                  ? "All Time"
+                  : `${MONTH_NAMES[selectedMonth]} ${selectedYear}`}
+              </span>
+            </button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleNextMonth}
+              title="Next Month"
+              aria-label="Next Month"
+              className="h-8 w-8 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 cursor-pointer"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+
+            {(!isCurrentMonthSelected || isAllTime) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleResetMonth}
+                title="Reset to current month"
+                aria-label="Reset to current month"
+                className="h-8 w-8 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
+
           <Button
             variant="outline"
             size="icon"
             onClick={() => {
               if (activeTab === "requests") fetchExpensesList(currentPage, true);
-              else fetchUserTotals();
+              else fetchUserTotals(true);
             }}
             disabled={isLoading || isRefreshing || isLoadingTotals}
             title="Refresh data"
-            className="h-10 w-10 rounded-xl glass-pill shadow-xs hover:border-violet-500/40"
+            className="h-10 w-10 rounded-xl glass-pill shadow-xs hover:border-violet-500/40 cursor-pointer"
           >
             <RotateCw
-              className={`h-4 w-4 ${isRefreshing || isLoadingTotals ? "animate-spin text-violet-600" : "text-muted-foreground hover:text-foreground"
-                }`}
+              className={`h-4 w-4 ${
+                isRefreshing || isLoadingTotals
+                  ? "animate-spin text-violet-600"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             />
           </Button>
 
           {/* Room Rent Request Button */}
           <Button
             onClick={() => setCreateDialogOpen(true)}
-            className="h-10 px-4 rounded-xl gap-2 font-bold shadow-lg shadow-violet-500/25 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="h-10 px-4 rounded-xl gap-2 font-bold shadow-lg shadow-violet-500/25 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           >
             <PlusCircle className="h-4 w-4 shrink-0" />
             <span>Room Rent Request</span>
@@ -472,10 +699,11 @@ function ExpensesContent() {
           <button
             type="button"
             onClick={() => handleTabChange("requests")}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${activeTab === "requests"
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+              activeTab === "requests"
                 ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25"
                 : "text-muted-foreground hover:text-foreground"
-              }`}
+            }`}
           >
             <LayoutList className="h-4 w-4" />
             <span>All Requests</span>
@@ -484,10 +712,11 @@ function ExpensesContent() {
           <button
             type="button"
             onClick={() => handleTabChange("totals")}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${activeTab === "totals"
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+              activeTab === "totals"
                 ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/25"
                 : "text-muted-foreground hover:text-foreground"
-              }`}
+            }`}
           >
             <Users className="h-4 w-4" />
             <span>User Totals Dashboard</span>
@@ -504,7 +733,7 @@ function ExpensesContent() {
             totalApproved={summaryStats.totalApproved}
             totalPending={summaryStats.totalPending}
             totalRemaining={summaryStats.totalRemaining}
-            titlePrefix="Total"
+            titlePrefix={isAllTime ? "Total" : `${MONTH_NAMES[selectedMonth]}`}
           />
 
           {/* Filter & Search Bar */}
@@ -595,106 +824,82 @@ function ExpensesContent() {
           users={userTotals}
           grandSummary={grandSummary}
           isLoading={isLoadingTotals}
-          onRefresh={fetchUserTotals}
+          onRefresh={() => fetchUserTotals(true)}
           onViewExpense={handleViewDetailsClick}
           onApproveExpense={handleApproveClick}
           onRejectExpense={handleRejectClick}
         />
       )}
 
-      {/* Modals & Dialogs */}
-      {/* 1. Create New Expense Dialog */}
+      {/* Dialogs */}
       <ExpenseCreateDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
-        isAdmin={isAdmin}
         onExpenseCreated={() => {
-          setSearchInput("");
-          setDebouncedSearch("");
-          setStatusFilter("ALL");
-          setCurrentPage(1);
-          fetchExpensesList(1, false, "", "ALL");
-          if (isAdmin) fetchUserTotals();
+          if (activeTab === "requests") fetchExpensesList(currentPage, true);
+          else fetchUserTotals(true);
         }}
-      />
-
-      {/* 2. Pay Remaining Installment Dialog */}
-      <ExpensePayDialog
-        expense={selectedExpense}
-        open={payDialogOpen}
-        onOpenChange={setPayDialogOpen}
-        onPaymentSubmitted={() => {
-          fetchExpensesList(currentPage, true);
-          if (isAdmin) fetchUserTotals();
-        }}
-      />
-
-      {/* 3. Expense Details & History Dialog */}
-      <ExpenseDetailsDialog
-        expense={selectedExpense}
-        open={detailsDialogOpen}
-        onOpenChange={setDetailsDialogOpen}
         isAdmin={isAdmin}
-        onApprove={handleApproveClick}
-        onReject={handleRejectClick}
-        canPayRemaining={
-          !isAdmin &&
-          Boolean(currentUser?.id) &&
-          String(selectedExpense?.user_id) === String(currentUser?.id)
-        }
-        onPayRemaining={handlePayRemainingClick}
       />
 
-      {/* 4. Admin Approve Dialog */}
-      {isAdmin && (
-        <ExpenseApproveDialog
-          expense={selectedExpense}
-          open={approveDialogOpen}
-          onOpenChange={setApproveDialogOpen}
-          onApproved={() => {
-            fetchExpensesList(currentPage, true);
-            fetchUserTotals(true);
-          }}
-        />
-      )}
+      {selectedExpense && (
+        <>
+          <ExpensePayDialog
+            open={payDialogOpen}
+            onOpenChange={setPayDialogOpen}
+            expense={selectedExpense}
+            onPaymentSubmitted={() => {
+              if (activeTab === "requests") fetchExpensesList(currentPage, true);
+              else fetchUserTotals(true);
+            }}
+          />
 
-      {/* 5. Admin Reject Dialog */}
-      {isAdmin && (
-        <ExpenseRejectDialog
-          expense={selectedExpense}
-          open={rejectDialogOpen}
-          onOpenChange={setRejectDialogOpen}
-          onRejected={() => {
-            fetchExpensesList(currentPage, true);
-            fetchUserTotals(true);
-          }}
-        />
-      )}
+          <ExpenseDetailsDialog
+            open={detailsDialogOpen}
+            onOpenChange={setDetailsDialogOpen}
+            expense={selectedExpense}
+          />
 
-      {/* 6. Admin Edit Dialog */}
-      {isAdmin && (
-        <ExpenseEditDialog
-          expense={selectedExpense}
-          open={editDialogOpen}
-          onOpenChange={setEditDialogOpen}
-          onUpdated={() => {
-            fetchExpensesList(currentPage, true);
-            fetchUserTotals(true);
-          }}
-        />
-      )}
+          <ExpenseApproveDialog
+            open={approveDialogOpen}
+            onOpenChange={setApproveDialogOpen}
+            expense={selectedExpense}
+            onApproved={() => {
+              if (activeTab === "requests") fetchExpensesList(currentPage, true);
+              else fetchUserTotals(true);
+            }}
+          />
 
-      {/* 7. Admin Delete Dialog */}
-      {isAdmin && (
-        <ExpenseDeleteDialog
-          expense={selectedExpense}
-          open={deleteDialogOpen}
-          onOpenChange={setDeleteDialogOpen}
-          onDeleted={() => {
-            fetchExpensesList(currentPage, true);
-            fetchUserTotals(true);
-          }}
-        />
+          <ExpenseRejectDialog
+            open={rejectDialogOpen}
+            onOpenChange={setRejectDialogOpen}
+            expense={selectedExpense}
+            onRejected={() => {
+              if (activeTab === "requests") fetchExpensesList(currentPage, true);
+              else fetchUserTotals(true);
+            }}
+          />
+
+          <ExpenseEditDialog
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+            expense={selectedExpense}
+            onUpdated={() => {
+              if (activeTab === "requests") fetchExpensesList(currentPage, true);
+              else fetchUserTotals(true);
+            }}
+          />
+
+          <ExpenseDeleteDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            expense={selectedExpense}
+            onDeleted={() => {
+              if (activeTab === "requests") fetchExpensesList(currentPage, true);
+              else fetchUserTotals(true);
+            }}
+          />
+        </>
       )}
     </div>
   );
@@ -704,10 +909,12 @@ export default function ExpensesPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center min-h-[300px]">
-          <div className="flex flex-col items-center gap-2">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            <p className="text-xs text-muted-foreground">Loading expenses...</p>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-600 border-t-transparent" />
+            <p className="text-sm text-muted-foreground font-medium">
+              Loading room rent collections...
+            </p>
           </div>
         </div>
       }
@@ -716,4 +923,3 @@ export default function ExpensesPage() {
     </Suspense>
   );
 }
-

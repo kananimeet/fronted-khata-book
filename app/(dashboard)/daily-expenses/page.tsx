@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useTransition } from "react";
+import React, { useState, useEffect, useCallback, useTransition, useMemo } from "react";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
@@ -33,12 +33,31 @@ import {
   Shield,
   UserCheck,
   ShoppingBag,
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  RotateCcw,
 } from "lucide-react";
+
+const MONTH_NAMES = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+];
+
+const MONTH_NAMES_FULL = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
 
 export default function DailyExpensesPage() {
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
   const [, startTransition] = useTransition();
+
+  const currentDate = useMemo(() => new Date(), []);
+  const [selectedYear, setSelectedYear] = useState<number>(currentDate.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentDate.getMonth()); // 0-indexed
+  const [isAllTime, setIsAllTime] = useState<boolean>(false);
 
   const isAdmin = currentUser?.role?.toUpperCase() === "ADMIN";
 
@@ -82,6 +101,12 @@ export default function DailyExpensesPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(false);
   const [totalApprovedPaid, setTotalApprovedPaid] = useState<number>(0);
+
+  // Check if active selection is current month
+  const isCurrentMonthSelected =
+    !isAllTime &&
+    selectedYear === currentDate.getFullYear() &&
+    selectedMonth === currentDate.getMonth();
 
   // Hydrate from localStorage strictly on client post-hydration to prevent SSR mismatch
   useEffect(() => {
@@ -142,7 +167,7 @@ export default function DailyExpensesPage() {
         if (isMounted) setIsLoadingUsers(false);
       });
 
-    getExpenses({ page: 1, limit: 1 })
+    getExpenses({ page: 1, limit: 100 })
       .then((data) => {
         if (!isMounted || !data) return;
         const approved =
@@ -166,19 +191,75 @@ export default function DailyExpensesPage() {
         const queryParams: DailyExpenseFilterParams = {
           ...filters,
           page: pageToLoad,
-          limit: pageSize,
+          limit: isAllTime ? pageSize : 500,
           search: debouncedSearch.trim() || undefined,
           forceRefresh: showRefreshSpinner,
         };
 
+        if (!isAllTime && !filters.startDate) {
+          const mStr = String(selectedMonth + 1).padStart(2, "0");
+          queryParams.startDate = `${selectedYear}-${mStr}-01`;
+          const lastDay = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+          queryParams.endDate = `${selectedYear}-${mStr}-${String(lastDay).padStart(2, "0")}`;
+        }
+
         const res = await getDailyExpenses(queryParams);
 
+        let items: DailyExpense[] = res.items || [];
+        let curSummary: DailyExpenseSummary = res.summary;
+
+        // Apply strict client-side month filter if viewing a specific month
+        if (!isAllTime) {
+          items = items.filter((item) => {
+            const raw = item.expense_date || item.created_at;
+            if (!raw) return false;
+            const d = new Date(raw);
+            if (!isNaN(d.getTime())) {
+              return d.getFullYear() === selectedYear && d.getMonth() === selectedMonth;
+            }
+            const parts = String(raw).split("T")[0].split("-");
+            if (parts.length >= 2) {
+              return (
+                parseInt(parts[0], 10) === selectedYear &&
+                parseInt(parts[1], 10) - 1 === selectedMonth
+              );
+            }
+            return false;
+          });
+
+          const approvedItems = items.filter((i) => i.status === "APPROVED");
+          const approvedRoom = approvedItems.filter(
+            (i) => i.expense_type === "room" || (i as any).category === "room"
+          );
+          const approvedOwn = approvedItems.filter(
+            (i) => i.expense_type === "own" || (i as any).category === "own"
+          );
+          const pendingItems = items.filter((i) => i.status === "PENDING");
+          const rejectedItems = items.filter((i) => i.status === "REJECTED");
+
+          curSummary = {
+            totalAmount: approvedItems.reduce((sum, i) => sum + (Number(i.amount) || 0), 0),
+            totalRoomAmount: approvedRoom.reduce((sum, i) => sum + (Number(i.amount) || 0), 0),
+            totalOwnAmount: approvedOwn.reduce((sum, i) => sum + (Number(i.amount) || 0), 0),
+            approvedCount: approvedItems.length,
+            pendingCount: pendingItems.length,
+            rejectedCount: rejectedItems.length,
+          };
+        }
+
+        const totalCount = isAllTime
+          ? res.pagination?.total || items.length
+          : items.length;
+        const totalPgs = isAllTime
+          ? res.pagination?.totalPages || 1
+          : Math.max(1, Math.ceil(items.length / pageSize));
+
         startTransition(() => {
-          setExpenses(res.items || []);
-          setSummary(res.summary);
-          setTotalItems(res.pagination.total || 0);
-          setCurrentPage(res.pagination.page || pageToLoad);
-          setTotalPages(res.pagination.totalPages || 1);
+          setExpenses(items);
+          setSummary(curSummary);
+          setTotalItems(totalCount);
+          setCurrentPage(pageToLoad);
+          setTotalPages(totalPgs);
         });
 
         // Cache first page default list for instant display next time
@@ -194,10 +275,10 @@ export default function DailyExpensesPage() {
               localStorage.setItem(
                 "bachelorsbook_daily_expenses_cache",
                 JSON.stringify({
-                  items: res.items,
-                  summary: res.summary,
-                  total: res.pagination.total,
-                  totalPages: res.pagination.totalPages,
+                  items,
+                  summary: curSummary,
+                  total: totalCount,
+                  totalPages: totalPgs,
                 })
               );
             } catch {}
@@ -212,10 +293,41 @@ export default function DailyExpensesPage() {
         setIsRefreshing(false);
       }
     },
-    [filters, debouncedSearch, toast]
+    [filters, debouncedSearch, toast, isAllTime, selectedYear, selectedMonth]
   );
 
-  // Re-fetch on filter changes or debounced search change
+  // Month navigation handlers
+  const handlePrevMonth = () => {
+    setIsAllTime(false);
+    if (selectedMonth === 0) {
+      setSelectedMonth(11);
+      setSelectedYear((y) => y - 1);
+    } else {
+      setSelectedMonth((m) => m - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    setIsAllTime(false);
+    if (selectedMonth === 11) {
+      setSelectedMonth(0);
+      setSelectedYear((y) => y + 1);
+    } else {
+      setSelectedMonth((m) => m + 1);
+    }
+  };
+
+  const handleResetMonth = () => {
+    setSelectedMonth(currentDate.getMonth());
+    setSelectedYear(currentDate.getFullYear());
+    setIsAllTime(false);
+  };
+
+  const handleToggleAllTime = () => {
+    setIsAllTime((prev) => !prev);
+  };
+
+  // Re-fetch on filter changes or debounced search change or month change
   useEffect(() => {
     fetchExpenses(filters.page || 1);
   }, [
@@ -227,6 +339,9 @@ export default function DailyExpensesPage() {
     filters.startDate,
     filters.endDate,
     debouncedSearch,
+    selectedYear,
+    selectedMonth,
+    isAllTime,
     fetchExpenses,
   ]);
 
@@ -238,7 +353,7 @@ export default function DailyExpensesPage() {
     }));
   };
 
-  // Reset filters handler
+  // Reset filters
   const handleResetFilters = () => {
     setFilters({
       page: 1,
@@ -300,7 +415,7 @@ export default function DailyExpensesPage() {
             <ShoppingBag className="h-6 w-6" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                 Daily Expenses & Groceries
               </h1>
@@ -318,17 +433,75 @@ export default function DailyExpensesPage() {
                   </span>
                 )}
               </Badge>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
+                <Calendar className="h-3 w-3" />
+                {isAllTime
+                  ? "All Time"
+                  : `${MONTH_NAMES[selectedMonth]} ${selectedYear}`}
+              </span>
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 font-medium">
-              {isAdmin
-                ? "Review room grocery bills, approve rent liability deductions, and manage expenses."
-                : "Submit room groceries to reduce your rent liability or track personal spending."}
+              {isAllTime
+                ? "Viewing all daily grocery expenses and room bills across all time."
+                : `Live summary & expenses for ${MONTH_NAMES_FULL[selectedMonth]} ${selectedYear}.`}
             </p>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
+        {/* Action Buttons: Month Navigator, Refresh & Create Expense */}
+        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto flex-wrap">
+          {/* Month Selector */}
+          <div className="flex items-center p-1 rounded-xl glass-pill border border-white/60 dark:border-white/10 shadow-xs">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handlePrevMonth}
+              title="Previous Month"
+              aria-label="Previous Month"
+              className="h-8 w-8 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 cursor-pointer"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            <button
+              type="button"
+              onClick={handleToggleAllTime}
+              title={isAllTime ? "Switch to monthly view" : "Switch to all-time view"}
+              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-foreground cursor-pointer hover:opacity-80 transition-opacity"
+            >
+              <Calendar className="h-3.5 w-3.5 text-violet-500" />
+              <span>
+                {isAllTime
+                  ? "All Time"
+                  : `${MONTH_NAMES[selectedMonth]} ${selectedYear}`}
+              </span>
+            </button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleNextMonth}
+              title="Next Month"
+              aria-label="Next Month"
+              className="h-8 w-8 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 cursor-pointer"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+
+            {(!isCurrentMonthSelected || isAllTime) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleResetMonth}
+                title="Reset to current month"
+                aria-label="Reset to current month"
+                className="h-8 w-8 rounded-lg hover:bg-white/20 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
+
           <Button
             variant="outline"
             size="icon"
@@ -336,7 +509,7 @@ export default function DailyExpensesPage() {
             disabled={isLoading || isRefreshing}
             title="Refresh expenses"
             aria-label="Refresh expenses"
-            className="h-10 w-10 rounded-xl glass-pill shadow-xs hover:border-violet-500/40"
+            className="h-10 w-10 rounded-xl glass-pill shadow-xs hover:border-violet-500/40 cursor-pointer"
           >
             <RotateCw
               className={`h-4 w-4 ${
@@ -347,7 +520,7 @@ export default function DailyExpensesPage() {
 
           <Button
             onClick={handleOpenCreate}
-            className="h-10 px-4 rounded-xl gap-2 font-bold shadow-lg shadow-violet-500/25 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="h-10 px-4 rounded-xl gap-2 font-bold shadow-lg shadow-violet-500/25 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           >
             <Plus className="h-4 w-4 shrink-0" />
             <span>Add New Expense</span>
@@ -410,11 +583,11 @@ export default function DailyExpensesPage() {
         totalPages={totalPages}
         totalItems={totalItems}
         pageSize={pageSize}
-        onPageChange={(page) => handleFilterChange({ page })}
+        onPageChange={(page) => fetchExpenses(page)}
         isLoading={isLoading}
       />
 
-      {/* 7. Create / Edit Dialog Modal */}
+      {/* Dialogs */}
       <DailyExpenseCreateEditDialog
         open={createEditDialogOpen}
         onOpenChange={setCreateEditDialogOpen}
@@ -422,21 +595,6 @@ export default function DailyExpensesPage() {
         onSuccess={() => fetchExpenses(currentPage, true)}
       />
 
-      {/* 8. Details Dialog Modal */}
-      <DailyExpenseDetailsDialog
-        open={detailsDialogOpen}
-        onOpenChange={setDetailsDialogOpen}
-        expense={selectedExpenseForDetails}
-        isAdmin={isAdmin}
-        currentUserId={currentUser?.id}
-        onEditExpense={handleOpenEdit}
-        onDeleteExpense={handleOpenDelete}
-        onApproveExpense={handleOpenApprove}
-        onRejectExpense={handleOpenReject}
-        onPreviewReceipt={handleOpenReceipt}
-      />
-
-      {/* 9. Admin Approve / Reject Dialog Modal */}
       <DailyExpenseActionDialog
         open={actionDialogOpen}
         onOpenChange={setActionDialogOpen}
@@ -445,7 +603,6 @@ export default function DailyExpensesPage() {
         onSuccess={() => fetchExpenses(currentPage, true)}
       />
 
-      {/* 10. Delete Confirmation Dialog */}
       <DailyExpenseDeleteDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
@@ -453,7 +610,19 @@ export default function DailyExpensesPage() {
         onSuccess={() => fetchExpenses(currentPage, true)}
       />
 
-      {/* 11. Receipt Preview Lightbox Modal */}
+      <DailyExpenseDetailsDialog
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        expense={selectedExpenseForDetails}
+        onEditExpense={handleOpenEdit}
+        onDeleteExpense={handleOpenDelete}
+        onApproveExpense={(exp: DailyExpense) => handleOpenApprove(exp)}
+        onRejectExpense={(exp: DailyExpense) => handleOpenReject(exp)}
+        onPreviewReceipt={handleOpenReceipt}
+        isAdmin={isAdmin}
+        currentUserId={currentUser?.id}
+      />
+
       <DailyExpenseReceiptModal
         open={receiptModalOpen}
         onOpenChange={setReceiptModalOpen}

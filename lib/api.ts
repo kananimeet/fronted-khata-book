@@ -4,6 +4,9 @@ import { getToken, clearAuthData } from "./cookies";
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 
+import { getImageUrl } from "./image";
+export { getImageUrl } from "./image";
+
 // Asset / image URL base derived from API_BASE_URL or fallback to http://localhost:5000
 export const ASSET_BASE_URL =
   process.env.NEXT_PUBLIC_ASSET_URL ||
@@ -11,20 +14,14 @@ export const ASSET_BASE_URL =
   "http://localhost:5000";
 
 /**
- * Resolves static asset paths (e.g. /uploads/users/...) against backend host.
+ * Resolves static asset and Cloudinary URLs for user profile pictures.
+ * Returns undefined if path is empty/null to allow UI AvatarFallback to render cleanly.
  */
 export function getProfilePictureUrl(path?: string | null): string | undefined {
-  if (!path) return undefined;
-  if (
-    path.startsWith("http://") ||
-    path.startsWith("https://") ||
-    path.startsWith("data:") ||
-    path.startsWith("blob:")
-  ) {
-    return path;
+  if (!path || typeof path !== "string" || path.trim() === "") {
+    return undefined;
   }
-  const cleanPath = path.startsWith("/") ? path : `/${path}`;
-  return `${ASSET_BASE_URL}${cleanPath}`;
+  return getImageUrl(path, "");
 }
 
 export const api = axios.create({

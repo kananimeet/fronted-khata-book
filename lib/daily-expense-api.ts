@@ -12,11 +12,18 @@ import {
   CategoryBreakdownItem,
 } from "@/types/daily-expense";
 
+import { getImageUrl } from "./image";
+export { getImageUrl } from "./image";
+
 /**
- * Resolves receipt/attachment photo URL.
+ * Resolves receipt/attachment photo URL (Cloudinary URL or legacy /uploads/...).
+ * Returns undefined if path is empty/null.
  */
 export function getDailyExpensePhotoUrl(path?: string | null): string | undefined {
-  return getProfilePictureUrl(path);
+  if (!path || typeof path !== "string" || path.trim() === "") {
+    return undefined;
+  }
+  return getImageUrl(path, "");
 }
 
 /**

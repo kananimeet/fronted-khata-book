@@ -17,6 +17,7 @@ import { getProfilePictureUrl } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { formatDate } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -59,20 +60,7 @@ export function UserDetailsDialog({
     }
   };
 
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return "N/A";
-    try {
-      return new Date(dateStr).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch {
-      return dateStr;
-    }
-  };
+
 
   const profileUrl = getProfilePictureUrl(user.profile_picture);
   const isActive = user.is_active !== false;
