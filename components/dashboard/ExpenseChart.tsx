@@ -71,7 +71,7 @@ function CustomGlassTooltip({ active, payload, label }: CustomTooltipProps) {
   const totalVal = roomVal + personalVal;
 
   return (
-    <div className="glass-card rounded-xl p-3.5 shadow-2xl border border-white/40 dark:border-white/10 text-xs min-w-[200px] z-50">
+    <div className="bg-white dark:bg-[#0f172a] rounded-xl p-3.5 shadow-2xl border border-slate-200 dark:border-slate-800 text-xs min-w-[200px] z-50 backdrop-blur-none">
       <div className="flex items-center justify-between pb-2 mb-2 border-b border-border/60">
         <span className="font-semibold text-foreground flex items-center gap-1.5">
           <Calendar className="h-3.5 w-3.5 text-violet-500" />

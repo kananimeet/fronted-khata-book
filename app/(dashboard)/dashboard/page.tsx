@@ -166,13 +166,20 @@ export default function DashboardPage() {
   // Main Dashboard Data Fetch (Expenses + Daily Expenses)
   const fetchDashboardData = useCallback(
     async (isManualRefresh = false) => {
-      if (isManualRefresh) setIsRefreshing(true);
-      else setIsLoading(true);
+      if (isManualRefresh) {
+        setIsRefreshing(true);
+      } else {
+        setRawDailyExpenses((prev) => {
+          if (!prev || prev.length === 0) setIsLoading(true);
+          else setIsRefreshing(true);
+          return prev;
+        });
+      }
 
       try {
         const [roomData, dailyRes] = await Promise.all([
-          getExpenses({ page: 1, limit: 200 }, true).catch(() => null),
-          getDailyExpenses({ limit: 500, forceRefresh: true }).catch(() => null),
+          getExpenses({ page: 1, limit: 200 }, isManualRefresh).catch(() => null),
+          getDailyExpenses({ limit: 500, forceRefresh: isManualRefresh }).catch(() => null),
           fetchChart(selectedYear, selectedMonth, isManualRefresh),
         ]);
 

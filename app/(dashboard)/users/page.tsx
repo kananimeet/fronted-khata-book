@@ -83,8 +83,15 @@ export default function UsersPage() {
   // Fetch Users
   const fetchUsers = useCallback(
     async (page = 1, showRefreshSpinner = false) => {
-      if (showRefreshSpinner) setIsRefreshing(true);
-      else setIsLoading(true);
+      if (showRefreshSpinner) {
+        setIsRefreshing(true);
+      } else {
+        setUsers((prev) => {
+          if (!prev || prev.length === 0) setIsLoading(true);
+          else setIsRefreshing(true);
+          return prev;
+        });
+      }
 
       try {
         const params: Record<string, string | number> = {
@@ -106,7 +113,7 @@ export default function UsersPage() {
         const response = await fetchWithDedupe(
           cacheKey,
           () => api.get<UsersListResponse>("/users", { params }),
-          15000,
+          60000,
           showRefreshSpinner
         );
 

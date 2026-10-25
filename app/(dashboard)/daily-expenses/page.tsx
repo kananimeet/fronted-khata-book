@@ -184,14 +184,21 @@ export default function DailyExpensesPage() {
   // Fetch Daily Expenses
   const fetchExpenses = useCallback(
     async (pageToLoad = 1, showRefreshSpinner = false) => {
-      if (showRefreshSpinner) setIsRefreshing(true);
-      else setIsLoading(true);
+      if (showRefreshSpinner) {
+        setIsRefreshing(true);
+      } else {
+        setExpenses((prev) => {
+          if (!prev || prev.length === 0) setIsLoading(true);
+          else setIsRefreshing(true);
+          return prev;
+        });
+      }
 
       try {
         const queryParams: DailyExpenseFilterParams = {
           ...filters,
-          page: pageToLoad,
-          limit: isAllTime ? pageSize : 500,
+          page: 1,
+          limit: 500,
           search: debouncedSearch.trim() || undefined,
           forceRefresh: showRefreshSpinner,
         };
@@ -247,12 +254,8 @@ export default function DailyExpensesPage() {
           };
         }
 
-        const totalCount = isAllTime
-          ? res.pagination?.total || items.length
-          : items.length;
-        const totalPgs = isAllTime
-          ? res.pagination?.totalPages || 1
-          : Math.max(1, Math.ceil(items.length / pageSize));
+        const totalCount = items.length;
+        const totalPgs = Math.max(1, Math.ceil(totalCount / pageSize));
 
         startTransition(() => {
           setExpenses(items);
@@ -296,9 +299,16 @@ export default function DailyExpensesPage() {
     [filters, debouncedSearch, toast, isAllTime, selectedYear, selectedMonth]
   );
 
+  // Paginated expenses: Exactly 10 records per page for the table and mobile cards
+  const paginatedExpenses = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return expenses.slice(start, start + pageSize);
+  }, [expenses, currentPage, pageSize]);
+
   // Month navigation handlers
   const handlePrevMonth = () => {
     setIsAllTime(false);
+    setCurrentPage(1);
     if (selectedMonth === 0) {
       setSelectedMonth(11);
       setSelectedYear((y) => y - 1);
@@ -309,6 +319,7 @@ export default function DailyExpensesPage() {
 
   const handleNextMonth = () => {
     setIsAllTime(false);
+    setCurrentPage(1);
     if (selectedMonth === 11) {
       setSelectedMonth(0);
       setSelectedYear((y) => y + 1);
@@ -321,17 +332,18 @@ export default function DailyExpensesPage() {
     setSelectedMonth(currentDate.getMonth());
     setSelectedYear(currentDate.getFullYear());
     setIsAllTime(false);
+    setCurrentPage(1);
   };
 
   const handleToggleAllTime = () => {
     setIsAllTime((prev) => !prev);
+    setCurrentPage(1);
   };
 
   // Re-fetch on filter changes or debounced search change or month change
   useEffect(() => {
-    fetchExpenses(filters.page || 1);
+    fetchExpenses(1);
   }, [
-    filters.page,
     filters.expense_type,
     filters.status,
     filters.category,
@@ -347,6 +359,7 @@ export default function DailyExpensesPage() {
 
   // Filter modification handler
   const handleFilterChange = (newFilters: Partial<DailyExpenseFilterParams>) => {
+    setCurrentPage(1);
     setFilters((prev) => ({
       ...prev,
       ...newFilters,
@@ -355,6 +368,7 @@ export default function DailyExpensesPage() {
 
   // Reset filters
   const handleResetFilters = () => {
+    setCurrentPage(1);
     setFilters({
       page: 1,
       limit: pageSize,
@@ -548,7 +562,7 @@ export default function DailyExpensesPage() {
       {/* 4. Expenses List: Desktop Table (hidden on mobile) */}
       <div className="hidden md:block">
         <DailyExpenseTable
-          expenses={expenses}
+          expenses={paginatedExpenses}
           isLoading={isLoading}
           isAdmin={isAdmin}
           currentUserId={currentUser?.id}
@@ -564,7 +578,7 @@ export default function DailyExpensesPage() {
       {/* 5. Expenses List: Mobile Card List (visible only on mobile) */}
       <div className="block md:hidden">
         <DailyExpenseCardList
-          expenses={expenses}
+          expenses={paginatedExpenses}
           isLoading={isLoading}
           isAdmin={isAdmin}
           currentUserId={currentUser?.id}
@@ -583,7 +597,10 @@ export default function DailyExpensesPage() {
         totalPages={totalPages}
         totalItems={totalItems}
         pageSize={pageSize}
-        onPageChange={(page) => fetchExpenses(page)}
+        onPageChange={(page) => {
+          setCurrentPage(page);
+          window.scrollTo({ top: 350, behavior: "smooth" });
+        }}
         isLoading={isLoading}
       />
 

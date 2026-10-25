@@ -232,8 +232,15 @@ function ExpensesContent() {
       overrideSearch?: string,
       overrideStatus?: string
     ) => {
-      if (showRefreshSpinner) setIsRefreshing(true);
-      else setIsLoading(true);
+      if (showRefreshSpinner) {
+        setIsRefreshing(true);
+      } else {
+        setExpenses((prev) => {
+          if (!prev || prev.length === 0) setIsLoading(true);
+          else setIsRefreshing(true);
+          return prev;
+        });
+      }
 
       try {
         const activeSearch =

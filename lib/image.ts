@@ -23,6 +23,10 @@ export const getImageUrl = (
     trimmed.startsWith("data:") ||
     trimmed.startsWith("blob:")
   ) {
+    if (trimmed.includes("devtunnels.ms") && !trimmed.includes("tunnel-skip-anti-phishing-page")) {
+      const sep = trimmed.includes("?") ? "&" : "?";
+      return `${trimmed}${sep}z-tunnel-skip-anti-phishing-page=true`;
+    }
     return trimmed;
   }
 
@@ -38,7 +42,13 @@ export const getImageUrl = (
   const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
   const cleanPath = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 
-  return cleanBase ? `${cleanBase}${cleanPath}` : cleanPath;
+  let finalUrl = cleanBase ? `${cleanBase}${cleanPath}` : cleanPath;
+  if (finalUrl.includes("devtunnels.ms") && !finalUrl.includes("tunnel-skip-anti-phishing-page")) {
+    const sep = finalUrl.includes("?") ? "&" : "?";
+    finalUrl = `${finalUrl}${sep}z-tunnel-skip-anti-phishing-page=true`;
+  }
+
+  return finalUrl;
 };
 
 export default getImageUrl;

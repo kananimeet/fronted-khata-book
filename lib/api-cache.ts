@@ -32,9 +32,9 @@ export function getCachedData<T = unknown>(key: string): T | null {
 }
 
 /**
- * Stores data in memory cache with specified time-to-live (default 20 seconds).
+ * Stores data in memory cache with specified time-to-live (default 60 seconds).
  */
-export function setCachedData<T = unknown>(key: string, data: T, ttlMs = 20000): void {
+export function setCachedData<T = unknown>(key: string, data: T, ttlMs = 60000): void {
   if (data === undefined || data === null) return;
   memoryCache.set(key, {
     data,
@@ -89,7 +89,7 @@ export function clearMutationCaches(): void {
 export async function fetchWithDedupe<T = unknown>(
   key: string,
   fetcher: () => Promise<T>,
-  ttlMs = 20000,
+  ttlMs = 60000,
   forceRefresh = false
 ): Promise<T> {
   // If not forcing refresh, return valid memory cache immediately (0ms)

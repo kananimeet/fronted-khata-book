@@ -61,7 +61,7 @@ export async function getExpenses(
       const response = await api.get("/expenses", { params });
       return response.data?.data ?? response.data;
     },
-    15000,
+    60000,
     forceRefresh
   );
 }

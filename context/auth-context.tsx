@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/auth";
+import { api } from "@/lib/api";
 import {
   getToken,
   setToken,
@@ -19,6 +20,7 @@ interface AuthContextType {
   login: (token: string, user: User, redirectPath?: string) => void;
   logout: () => void;
   updateUser: (partial: Partial<User>) => void;
+  syncCurrentUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,10 +32,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setTokenState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const syncCurrentUser = async () => {
+    const activeToken = getToken();
+    const stored = getStoredUser();
+    if (!activeToken || !stored?.id) return;
+
+    try {
+      // 1. Try GET /users/:id
+      try {
+        const res = await api.get(`/users/${stored.id}`);
+        const freshUser = res.data?.data?.user || res.data?.data || res.data?.user;
+        if (freshUser && (freshUser.id || freshUser.email)) {
+          updateUser(freshUser);
+          return;
+        }
+      } catch {
+        // Fallback to GET /users?search=
+      }
+
+      // 2. Fallback to GET /users?search=email
+      if (stored.email) {
+        const res = await api.get("/users", {
+          params: { search: stored.email.trim(), limit: 10 },
+        });
+        const usersList = res.data?.data?.users;
+        if (Array.isArray(usersList)) {
+          const found = usersList.find(
+            (u: User) =>
+              String(u.id) === String(stored.id) ||
+              u.email?.toLowerCase() === stored.email?.toLowerCase()
+          );
+          if (found) {
+            updateUser(found);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("Background user sync skipped:", err);
+    }
+  };
+
   useEffect(() => {
-    setUser(getStoredUser());
-    setTokenState(getToken() ?? null);
+    const stored = getStoredUser();
+    setUser(stored);
+    const initialToken = getToken() ?? null;
+    setTokenState(initialToken);
     setIsLoading(false);
+
+    // Sync latest user profile from server in background if authenticated
+    if (initialToken && stored?.id) {
+      syncCurrentUser();
+    }
   }, []);
 
   const login = (newToken: string, newUser: User, redirectPath = "/dashboard") => {
@@ -80,8 +129,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateUser = (partial: Partial<User>) => {
     setUser((prev) => {
-      if (!prev) return null;
-      const updated = { ...prev, ...partial };
+      const base = prev || getStoredUser() || ({} as User);
+      const updated = { ...base, ...partial };
       setStoredUser(updated);
       return updated;
     });
@@ -97,6 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         logout,
         updateUser,
+        syncCurrentUser,
       }}
     >
       {children}

@@ -17,6 +17,7 @@ import {
 
 import { api, getApiErrorMessage, getProfilePictureUrl } from "@/lib/api";
 import { User } from "@/types/auth";
+import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +70,7 @@ export function UserEditDialog({
   onOpenChange,
   onUserUpdated,
 }: UserEditDialogProps) {
+  const { user: currentUser, updateUser } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -171,7 +173,49 @@ export function UserEditDialog({
         formData.append("profile_picture", selectedFile);
       }
 
-      await api.patch(`/users/${user.id}`, formData);
+      const response = await api.patch(`/users/${user.id}`, formData);
+
+      const resData = response.data;
+      const resUser: User | null =
+        resData?.data?.user ||
+        resData?.data ||
+        resData?.user ||
+        (resData?.id ? resData : null);
+
+      let freshProfilePic = resUser?.profile_picture;
+
+      // If a file was selected but profile_picture isn't in response, fetch updated user from server
+      if (selectedFile && !freshProfilePic) {
+        try {
+          const freshRes = await api.get<{ data: { users: User[] } }>("/users", {
+            params: { search: data.email.trim().toLowerCase(), limit: 10 },
+          });
+          const found = freshRes.data?.data?.users?.find(
+            (u) =>
+              String(u.id) === String(user.id) ||
+              u.email?.toLowerCase() === data.email.trim().toLowerCase()
+          );
+          if (found?.profile_picture) {
+            freshProfilePic = found.profile_picture;
+          }
+        } catch (e) {
+          console.warn("Could not refetch profile_picture:", e);
+        }
+      }
+
+      // If editing self, sync immediately into AuthContext and cookie
+      const isSelf = currentUser && String(currentUser.id) === String(user.id);
+      if (isSelf) {
+        const mergedUser: User = {
+          ...currentUser,
+          ...(resUser || {}),
+          name: data.name.trim(),
+          email: data.email.trim().toLowerCase(),
+          mobile: data.mobile.trim(),
+          ...(freshProfilePic ? { profile_picture: freshProfilePic } : {}),
+        };
+        updateUser(mergedUser);
+      }
 
       toast.success(`Profile for "${data.name}" updated successfully.`);
       onOpenChange(false);

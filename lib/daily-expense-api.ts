@@ -103,7 +103,7 @@ export async function getDailyExpenses(
         success: true,
       };
     },
-    15000,
+    60000,
     !!filters.forceRefresh
   );
 }
