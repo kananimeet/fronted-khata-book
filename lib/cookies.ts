@@ -9,11 +9,13 @@ export function getToken(): string | undefined {
 }
 
 export function setToken(token: string): void {
+  const isHttps =
+    typeof window !== "undefined" && window.location.protocol === "https:";
   Cookies.set(TOKEN_COOKIE_KEY, token, {
     expires: 7,
     path: "/",
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: isHttps,
   });
 }
 
@@ -32,11 +34,13 @@ export function getStoredUser(): User | null {
 }
 
 export function setStoredUser(user: User): void {
+  const isHttps =
+    typeof window !== "undefined" && window.location.protocol === "https:";
   Cookies.set(USER_COOKIE_KEY, JSON.stringify(user), {
     expires: 7,
     path: "/",
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: isHttps,
   });
 }
 

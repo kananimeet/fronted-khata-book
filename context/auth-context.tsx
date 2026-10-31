@@ -103,8 +103,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setStoredUser(newUser);
     setTokenState(newToken);
     setUser(newUser);
-    router.push(redirectPath);
-    router.refresh();
+    if (typeof window !== "undefined") {
+      window.location.href = redirectPath;
+    } else {
+      router.push(redirectPath);
+      router.refresh();
+    }
   };
 
   const logout = () => {
