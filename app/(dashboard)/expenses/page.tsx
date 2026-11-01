@@ -160,38 +160,71 @@ function ExpensesContent() {
   }, [searchInput]);
 
   // Helper to calculate summary numbers if backend does not return summary object
-  const calculateClientSummary = useCallback((items: Expense[]) => {
-    let roomRate = 0;
-    let approved = 0;
-    let pending = 0;
-    let remaining = 0;
+  const calculateClientSummary = useCallback(
+    (items: Expense[], filterYear?: number, filterMonth?: number) => {
+      let roomRate = 0;
+      let approved = 0;
+      let pending = 0;
+      let remaining = 0;
 
-    items.forEach((item) => {
-      // Room Rate and Remaining should only count approved/active requests (COMPLETE or REMAINING)
-      if (item.status === "COMPLETE" || item.status === "REMAINING") {
-        roomRate += Number(item.total_amount) || 0;
-        remaining += Number(item.remaining_amount) || 0;
-      }
-      approved += Number(item.paid_amount) || 0;
-      if (item.status === "PENDING") {
-        pending += Number(item.pay_amount) || 0;
-      } else {
-        const pendingP = item.payments?.find((p) => p.status === "PENDING");
-        if (pendingP) {
-          pending += Number(pendingP.amount) || 0;
+      const isMatchingMonth = (dateStr: any) => {
+        if (filterYear === undefined || filterMonth === undefined) return true;
+        if (!dateStr) return false;
+        const d = new Date(dateStr);
+        if (!isNaN(d.getTime())) {
+          return d.getFullYear() === filterYear && d.getMonth() === filterMonth;
         }
-      }
-    });
+        const parts = String(dateStr).split("T")[0].split("-");
+        if (parts.length >= 2) {
+          return (
+            parseInt(parts[0], 10) === filterYear &&
+            parseInt(parts[1], 10) - 1 === filterMonth
+          );
+        }
+        return false;
+      };
 
-    const summary = {
-      totalRoomRate: roomRate,
-      totalApproved: approved,
-      totalPending: pending,
-      totalRemaining: remaining,
-    };
-    setSummaryStats(summary);
-    return summary;
-  }, []);
+      items.forEach((item) => {
+        const itemCreated = item.created_at || (item as any).createdAt || (item as any).date;
+        const itemInMonth = isMatchingMonth(itemCreated);
+
+        if (itemInMonth) {
+          if (item.status === "COMPLETE" || item.status === "REMAINING") {
+            roomRate += Number(item.total_amount) || 0;
+            remaining += Number(item.remaining_amount) || 0;
+          }
+          if (item.status === "PENDING") {
+            pending += Number(item.pay_amount) || 0;
+          }
+        }
+
+        if (Array.isArray(item.payments) && item.payments.length > 0) {
+          item.payments.forEach((p) => {
+            const pDate = p.created_at || (p as any).createdAt || (p as any).date || itemCreated;
+            if (isMatchingMonth(pDate)) {
+              if (p.status === "APPROVED") {
+                approved += Number(p.amount) || 0;
+              } else if (p.status === "PENDING") {
+                pending += Number(p.amount) || 0;
+              }
+            }
+          });
+        } else if (itemInMonth) {
+          approved += Number(item.paid_amount) || 0;
+        }
+      });
+
+      const summary = {
+        totalRoomRate: roomRate,
+        totalApproved: approved,
+        totalPending: pending,
+        totalRemaining: remaining,
+      };
+      setSummaryStats(summary);
+      return summary;
+    },
+    []
+  );
 
   // Month navigation handlers
   const handlePrevMonth = () => {
@@ -281,21 +314,34 @@ function ExpensesContent() {
           let displayItems = items;
           if (!isAllTime) {
             displayItems = items.filter((item) => {
-              const raw = item.created_at;
-              if (!raw) return false;
-              const d = new Date(raw);
-              if (!isNaN(d.getTime())) {
-                return (
-                  d.getFullYear() === selectedYear && d.getMonth() === selectedMonth
-                );
+              const checkDateMatch = (rawDate: any) => {
+                if (!rawDate) return false;
+                const d = new Date(rawDate);
+                if (!isNaN(d.getTime())) {
+                  return (
+                    d.getFullYear() === selectedYear && d.getMonth() === selectedMonth
+                  );
+                }
+                const parts = String(rawDate).split("T")[0].split("-");
+                if (parts.length >= 2) {
+                  return (
+                    parseInt(parts[0], 10) === selectedYear &&
+                    parseInt(parts[1], 10) - 1 === selectedMonth
+                  );
+                }
+                return false;
+              };
+
+              const raw = item.created_at || (item as any).createdAt || (item as any).date;
+              if (checkDateMatch(raw)) return true;
+
+              if (Array.isArray(item.payments)) {
+                return item.payments.some((p) => {
+                  const pDate = p.created_at || (p as any).createdAt || (p as any).date;
+                  return checkDateMatch(pDate);
+                });
               }
-              const parts = String(raw).split("T")[0].split("-");
-              if (parts.length >= 2) {
-                return (
-                  parseInt(parts[0], 10) === selectedYear &&
-                  parseInt(parts[1], 10) - 1 === selectedMonth
-                );
-              }
+
               return false;
             });
           }
@@ -359,7 +405,11 @@ function ExpensesContent() {
             };
             setSummaryStats(currentSummary);
           } else {
-            currentSummary = calculateClientSummary(displayItems);
+            currentSummary = calculateClientSummary(
+              displayItems,
+              isAllTime ? undefined : selectedYear,
+              isAllTime ? undefined : selectedMonth
+            );
           }
 
           // Cache first page default list for instant display next time

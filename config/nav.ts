@@ -3,6 +3,7 @@ import {
   Users,
   IndianRupee,
   ShoppingBag,
+  ReceiptText,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -30,6 +31,11 @@ export const navItems: NavItem[] = [
     title: "Daily Expenses",
     href: "/daily-expenses",
     icon: ShoppingBag,
+  },
+  {
+    title: "Statement",
+    href: "/statement",
+    icon: ReceiptText,
   },
   {
     title: "Users",

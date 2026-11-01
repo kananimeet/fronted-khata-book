@@ -42,7 +42,7 @@ export function DailyExpenseReceiptModal({
             </DialogTitle>
             <p className="text-xs text-muted-foreground mt-1 font-medium">
               <span className="font-mono font-bold text-foreground">{formatCurrency(expense.amount)}</span> • {expense.category} •{" "}
-              {formatDate(expense.expense_date)}
+              {formatDate(expense.created_at || (expense as any).createdAt || expense.expense_date)}
             </p>
           </div>
 

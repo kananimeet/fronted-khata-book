@@ -179,7 +179,7 @@ export function DailyExpenseActionDialog({
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground font-medium">Date:</span>
               <span className="text-foreground font-medium">
-                {formatDate(expense.expense_date)}
+                {formatDate(expense.created_at || (expense as any).createdAt || expense.expense_date)}
               </span>
             </div>
 

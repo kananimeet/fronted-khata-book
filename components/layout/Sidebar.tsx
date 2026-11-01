@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   IndianRupee,
   ShoppingBag,
+  ReceiptText,
   Users,
   Settings,
   ChevronLeft,
@@ -34,6 +35,11 @@ export const NAV_LINKS = [
     title: "Daily Expenses",
     href: "/daily-expenses",
     icon: ShoppingBag,
+  },
+  {
+    title: "Statement",
+    href: "/statement",
+    icon: ReceiptText,
   },
   {
     title: "Users",

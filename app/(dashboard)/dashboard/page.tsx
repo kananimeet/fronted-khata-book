@@ -29,6 +29,7 @@ import { CategoryDonut } from "@/components/dashboard/CategoryDonut";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { Transaction, ExpenseCategory, ExpenseStatus } from "@/lib/mock-data";
 import { formatINR } from "@/lib/format";
+import { formatDate } from "@/lib/utils";
 
 const DASHBOARD_CACHE_KEY = "bachelorsbook_dashboard_cache_v4";
 const OLD_DASHBOARD_CACHE_KEY = "khatabook_dashboard_cache_v3";
@@ -67,13 +68,29 @@ function getItemDate(dateVal: any): Date | null {
   return null;
 }
 
+function getRecordDate(record: any): Date | null {
+  if (!record) return null;
+  if (record instanceof Date || typeof record === "string" || typeof record === "number") {
+    return getItemDate(record);
+  }
+  const val =
+    record.expense_date ??
+    record.expenseDate ??
+    record.created_at ??
+    record.createdAt ??
+    record.date ??
+    record.updated_at ??
+    record.updatedAt;
+  return getItemDate(val);
+}
+
 function matchesPeriod(
-  dateVal: any,
+  recordOrDate: any,
   year: number,
   month: number,
   viewMode: "monthly" | "yearly"
 ): boolean {
-  const d = getItemDate(dateVal);
+  const d = getRecordDate(recordOrDate);
   if (!d) return false;
   if (viewMode === "yearly") {
     return d.getFullYear() === year;
@@ -82,11 +99,11 @@ function matchesPeriod(
 }
 
 function isBeforeMonth(
-  dateVal: any,
+  recordOrDate: any,
   targetYear: number,
   targetMonth: number
 ): boolean {
-  const d = getItemDate(dateVal);
+  const d = getRecordDate(recordOrDate);
   if (!d) return false;
   if (d.getFullYear() < targetYear) return true;
   if (d.getFullYear() === targetYear && d.getMonth() < targetMonth) return true;
@@ -297,7 +314,7 @@ export default function DashboardPage() {
   const monthlyMetrics = useMemo(() => {
     // 1. Daily Expenses in this period
     const periodDaily = rawDailyExpenses.filter((item) =>
-      matchesPeriod(item.expense_date || item.created_at, selectedYear, selectedMonth, viewMode)
+      matchesPeriod(item, selectedYear, selectedMonth, viewMode)
     );
 
     const approvedRoomDaily = periodDaily.filter(
@@ -306,47 +323,40 @@ export default function DashboardPage() {
         item.status === "APPROVED"
     );
 
-    let dailySpent = approvedRoomDaily.reduce(
+    const dailySpent = approvedRoomDaily.reduce(
       (sum, item) => sum + (Number(item.amount) || 0),
       0
     );
-    let dailyCount = approvedRoomDaily.length;
+    const dailyCount = approvedRoomDaily.length;
 
     // 2. Room Rent & Collections in this period
-    const periodRoom = rawRoomExpenses.filter((item) =>
-      matchesPeriod(item.created_at, selectedYear, selectedMonth, viewMode)
-    );
-
     let roomRate = 0;
     let approved = 0;
     let pending = 0;
     let remaining = 0;
-    let activeCollectionsCount = periodRoom.length;
+    let activeCollectionsCount = 0;
     let pendingRequestsCount = 0;
 
-    periodRoom.forEach((item) => {
-      if (item.status === "COMPLETE" || item.status === "REMAINING") {
-        roomRate += Number(item.total_amount) || 0;
-        remaining += Number(item.remaining_amount) || 0;
-      }
-      approved += Number(item.paid_amount) || 0;
-      if (item.status === "PENDING") {
-        pending += Number(item.pay_amount) || 0;
-        pendingRequestsCount++;
-      } else {
-        const pendingP = item.payments?.find((p) => p.status === "PENDING");
-        if (pendingP) {
-          pending += Number(pendingP.amount) || 0;
+    rawRoomExpenses.forEach((item) => {
+      const isThisMonth = matchesPeriod(item, selectedYear, selectedMonth, viewMode);
+
+      if (isThisMonth) {
+        activeCollectionsCount++;
+        if (item.status === "COMPLETE" || item.status === "REMAINING") {
+          roomRate += Number(item.total_amount) || 0;
+          remaining += Number(item.remaining_amount) || 0;
+        }
+        if (item.status === "PENDING") {
+          pending += Number(item.pay_amount) || 0;
           pendingRequestsCount++;
         }
       }
-    });
 
-    // Also include payments made during this period for room expenses created earlier
-    rawRoomExpenses.forEach((item) => {
-      if (!matchesPeriod(item.created_at, selectedYear, selectedMonth, viewMode)) {
-        item.payments?.forEach((p) => {
-          if (matchesPeriod(p.created_at, selectedYear, selectedMonth, viewMode)) {
+      // Check payments made during this period
+      if (Array.isArray(item.payments) && item.payments.length > 0) {
+        item.payments.forEach((p) => {
+          const pDate = getRecordDate(p) || getRecordDate(item);
+          if (matchesPeriod(pDate, selectedYear, selectedMonth, viewMode)) {
             if (p.status === "APPROVED") {
               approved += Number(p.amount) || 0;
             } else if (p.status === "PENDING") {
@@ -355,21 +365,11 @@ export default function DashboardPage() {
             }
           }
         });
+      } else if (isThisMonth) {
+        // Fallback if payments array is not attached
+        approved += Number(item.paid_amount) || 0;
       }
     });
-
-    // Fallback strictly for the current active period if items lack dates in DB
-    if (isCurrentPeriod) {
-      if (approved === 0 && rawRoomSummary?.totalApproved > 0) {
-        approved = Number(rawRoomSummary.totalApproved) || 0;
-        roomRate = Number(rawRoomSummary.totalRoomRate) || 0;
-        remaining = Number(rawRoomSummary.totalRemaining) || 0;
-        pending = Number(rawRoomSummary.totalPending) || 0;
-      }
-      if (dailySpent === 0 && chartData?.summary?.monthRoom && viewMode === "monthly") {
-        dailySpent = Number(chartData.summary.monthRoom) || 0;
-      }
-    }
 
     // 3. CARRY-FORWARD: Calculate cumulative balance up to previous month
     let carriedForwardBalance = 0;
@@ -379,18 +379,18 @@ export default function DashboardPage() {
 
       // Previous room collections before this month
       rawRoomExpenses.forEach((item) => {
-        if (isBeforeMonth(item.created_at, selectedYear, selectedMonth)) {
-          prevApproved += Number(item.paid_amount) || 0;
-        }
-        item.payments?.forEach((p) => {
-          if (isBeforeMonth(p.created_at, selectedYear, selectedMonth)) {
-            if (p.status === "APPROVED") {
-              if (!isBeforeMonth(item.created_at, selectedYear, selectedMonth)) {
-                prevApproved += Number(p.amount) || 0;
-              }
+        if (Array.isArray(item.payments) && item.payments.length > 0) {
+          item.payments.forEach((p) => {
+            const pDate = getRecordDate(p) || getRecordDate(item);
+            if (p.status === "APPROVED" && isBeforeMonth(pDate, selectedYear, selectedMonth)) {
+              prevApproved += Number(p.amount) || 0;
             }
+          });
+        } else {
+          if (isBeforeMonth(item, selectedYear, selectedMonth)) {
+            prevApproved += Number(item.paid_amount) || 0;
           }
-        });
+        }
       });
 
       // Previous room daily expenses before this month
@@ -398,7 +398,7 @@ export default function DashboardPage() {
         if (
           (item.expense_type === "room" || (item as any).category === "room") &&
           item.status === "APPROVED" &&
-          isBeforeMonth(item.expense_date || item.created_at, selectedYear, selectedMonth)
+          isBeforeMonth(item, selectedYear, selectedMonth)
         ) {
           prevDailySpent += Number(item.amount) || 0;
         }
@@ -407,11 +407,8 @@ export default function DashboardPage() {
       carriedForwardBalance = Math.max(0, prevApproved - prevDailySpent);
     }
 
-    // Net Room Rate: Carried Forward Balance + Current Month Approved - Current Month Daily Expenses
-    const netRoomRate = Math.max(
-      0,
-      carriedForwardBalance + approved - dailySpent
-    );
+    // Net Room Rate: Opening Carried Forward Balance + Current Month Approved - Current Month Daily Expenses
+    const netRoomRate = carriedForwardBalance + approved - dailySpent;
 
     const totalTarget = approved + remaining;
     const collectionRate =
@@ -436,12 +433,9 @@ export default function DashboardPage() {
   }, [
     rawDailyExpenses,
     rawRoomExpenses,
-    rawRoomSummary,
     selectedYear,
     selectedMonth,
     viewMode,
-    isCurrentPeriod,
-    chartData,
   ]);
 
   // Extract dynamic sparkline series from real daily trend
@@ -488,13 +482,15 @@ export default function DashboardPage() {
       subtitle:
         monthlyMetrics.carriedForwardBalance > 0
           ? monthlyMetrics.dailySpent > 0
-            ? `Net balance after ${formatINR(monthlyMetrics.dailySpent)} (incl. ${formatINR(monthlyMetrics.carriedForwardBalance)} carried fwd)`
-            : `Includes ${formatINR(monthlyMetrics.carriedForwardBalance)} carried forward`
+            ? monthlyMetrics.netRoomRate < 0
+              ? `Deficit of ${formatINR(Math.abs(monthlyMetrics.netRoomRate))} (Opening: ${formatINR(monthlyMetrics.carriedForwardBalance)} | Spent: ${formatINR(monthlyMetrics.dailySpent)})`
+              : `Net balance after ${formatINR(monthlyMetrics.dailySpent)} (incl. ${formatINR(monthlyMetrics.carriedForwardBalance)} carried fwd)`
+            : `Includes ${formatINR(monthlyMetrics.carriedForwardBalance)} carried forward from previous month`
           : monthlyMetrics.dailySpent > 0
             ? `Net balance after ${formatINR(monthlyMetrics.dailySpent)} expenses`
             : `${monthlyMetrics.activeCollectionsCount} active room collections`,
       icon: Home,
-      variant: "blue" as const,
+      variant: monthlyMetrics.netRoomRate < 0 ? ("rose" as const) : ("blue" as const),
       sparklineData: sparklineRoom,
     },
     {
@@ -550,7 +546,7 @@ export default function DashboardPage() {
   // Filter transactions for active month
   const liveTransactions = useMemo<Transaction[]>(() => {
     const periodItems = rawDailyExpenses.filter((item) =>
-      matchesPeriod(item.expense_date || item.created_at, selectedYear, selectedMonth, viewMode)
+      matchesPeriod(item, selectedYear, selectedMonth, viewMode)
     );
 
     return periodItems.slice(0, 10).map((item, idx) => {
@@ -604,14 +600,7 @@ export default function DashboardPage() {
         categoryColor: color,
         categoryBg: bg,
         amount: Number(item.amount) || 0,
-        date: d.toLocaleDateString("en-IN", {
-          timeZone: "Asia/Kolkata",
-          day: "2-digit",
-          month: "short",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        }),
+        date: formatDate(item.created_at || (item as any).createdAt || item.expense_date),
         paidBy: { name: userName, initials },
         type: item.expense_type === "room" ? "room" : "personal",
         status: (item.status?.toUpperCase() || "APPROVED") as ExpenseStatus,

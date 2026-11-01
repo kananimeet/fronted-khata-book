@@ -100,7 +100,103 @@ export default function DailyExpensesPage() {
   // Admin users list for dropdown
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(false);
-  const [totalApprovedPaid, setTotalApprovedPaid] = useState<number>(0);
+  const [allRoomExpenses, setAllRoomExpenses] = useState<any[]>([]);
+  const [allRoomSummary, setAllRoomSummary] = useState<any>(null);
+
+  // Compute month-aware room pool fund (Opening carry forward + this month approved collections)
+  const totalApprovedPaid = useMemo(() => {
+    if (isAllTime) {
+      const sumItems = allRoomExpenses.reduce(
+        (sum, item) => sum + (Number(item.paid_amount) || 0),
+        0
+      );
+      return sumItems || Number(allRoomSummary?.totalApproved) || 0;
+    }
+
+    const checkDateMatch = (rawDate: any, targetYear: number, targetMonth: number) => {
+      if (!rawDate) return false;
+      const d = new Date(rawDate);
+      if (!isNaN(d.getTime())) {
+        return d.getFullYear() === targetYear && d.getMonth() === targetMonth;
+      }
+      const parts = String(rawDate).split("T")[0].split("-");
+      if (parts.length >= 2) {
+        return (
+          parseInt(parts[0], 10) === targetYear &&
+          parseInt(parts[1], 10) - 1 === targetMonth
+        );
+      }
+      return false;
+    };
+
+    const isBefore = (rawDate: any, targetYear: number, targetMonth: number) => {
+      if (!rawDate) return false;
+      const d = new Date(rawDate);
+      if (!isNaN(d.getTime())) {
+        if (d.getFullYear() < targetYear) return true;
+        if (d.getFullYear() === targetYear && d.getMonth() < targetMonth) return true;
+        return false;
+      }
+      const parts = String(rawDate).split("T")[0].split("-");
+      if (parts.length >= 2) {
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        if (y < targetYear) return true;
+        if (y === targetYear && m < targetMonth) return true;
+      }
+      return false;
+    };
+
+    // Calculate carry forward up to previous month
+    let prevApproved = 0;
+    allRoomExpenses.forEach((item) => {
+      if (Array.isArray(item.payments) && item.payments.length > 0) {
+        item.payments.forEach((p: any) => {
+          const pDate = p.created_at || p.createdAt || p.date || item.created_at || item.createdAt;
+          if (p.status === "APPROVED" && isBefore(pDate, selectedYear, selectedMonth)) {
+            prevApproved += Number(p.amount) || 0;
+          }
+        });
+      } else {
+        const itemDate = item.created_at || item.createdAt || item.date;
+        if (isBefore(itemDate, selectedYear, selectedMonth)) {
+          prevApproved += Number(item.paid_amount) || 0;
+        }
+      }
+    });
+
+    // Previous room daily expenses before this month
+    const prevDailySpent = expenses
+      .filter((i) => {
+        const iDate = i.expense_date || i.created_at || (i as any).createdAt;
+        return (
+          (i.expense_type === "room" || (i as any).category === "room") &&
+          i.status === "APPROVED" &&
+          isBefore(iDate, selectedYear, selectedMonth)
+        );
+      })
+      .reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
+
+    const carriedForward = Math.max(0, prevApproved - prevDailySpent);
+
+    // Current month approved
+    let currentApproved = 0;
+    allRoomExpenses.forEach((item) => {
+      const itemDate = item.created_at || item.createdAt || item.date;
+      if (Array.isArray(item.payments) && item.payments.length > 0) {
+        item.payments.forEach((p: any) => {
+          const pDate = p.created_at || p.createdAt || p.date || itemDate;
+          if (p.status === "APPROVED" && checkDateMatch(pDate, selectedYear, selectedMonth)) {
+            currentApproved += Number(p.amount) || 0;
+          }
+        });
+      } else if (checkDateMatch(itemDate, selectedYear, selectedMonth)) {
+        currentApproved += Number(item.paid_amount) || 0;
+      }
+    });
+
+    return carriedForward + currentApproved;
+  }, [allRoomExpenses, allRoomSummary, isAllTime, selectedYear, selectedMonth, expenses]);
 
   // Check if active selection is current month
   const isCurrentMonthSelected =
@@ -167,12 +263,16 @@ export default function DailyExpensesPage() {
         if (isMounted) setIsLoadingUsers(false);
       });
 
-    getExpenses({ page: 1, limit: 100 })
+    getExpenses({ page: 1, limit: 200 })
       .then((data) => {
         if (!isMounted || !data) return;
-        const approved =
-          Number(data.summary?.totalApproved ?? data.summary?.totalApprovedAmount) || 0;
-        if (approved > 0) setTotalApprovedPaid(approved);
+        let items: any[] = [];
+        if (Array.isArray(data)) items = data;
+        else if (Array.isArray(data.items)) items = data.items;
+        else if (Array.isArray(data.expenses)) items = data.expenses;
+        else if (Array.isArray(data.data)) items = data.data;
+        setAllRoomExpenses(items);
+        if (data.summary) setAllRoomSummary(data.summary);
       })
       .catch(() => {});
 
@@ -218,7 +318,7 @@ export default function DailyExpensesPage() {
         // Apply strict client-side month filter if viewing a specific month
         if (!isAllTime) {
           items = items.filter((item) => {
-            const raw = item.expense_date || item.created_at;
+            const raw = item.expense_date || item.created_at || (item as any).createdAt;
             if (!raw) return false;
             const d = new Date(raw);
             if (!isNaN(d.getTime())) {

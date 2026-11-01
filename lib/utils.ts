@@ -17,7 +17,7 @@ export function formatCurrency(amount: number | string | null | undefined): stri
 }
 
 export function formatDate(
-  dateString: string | null | undefined,
+  dateString: string | Date | null | undefined,
   includeTime = true
 ): string {
   if (!dateString) return "N/A";
@@ -25,9 +25,13 @@ export function formatDate(
     const trimmed = String(dateString).trim();
     if (!trimmed) return "N/A";
 
-    // Date-only string like "YYYY-MM-DD"
-    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-      const [year, month, day] = trimmed.split("-").map(Number);
+    // Date-only string like "YYYY-MM-DD" or UTC midnight "YYYY-MM-DDT00:00:00.000Z"
+    const isDateOnly =
+      /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ||
+      /^\d{4}-\d{2}-\d{2}T00:00:00(\.000)?Z?$/i.test(trimmed);
+
+    if (isDateOnly) {
+      const [year, month, day] = trimmed.split("T")[0].split("-").map(Number);
       const d = new Date(year, month - 1, day);
       return new Intl.DateTimeFormat("en-IN", {
         timeZone: "Asia/Kolkata",
@@ -53,23 +57,25 @@ export function formatDate(
       options.hour12 = true;
     }
 
-    return new Intl.DateTimeFormat("en-IN", options).format(d);
+    const result = new Intl.DateTimeFormat("en-IN", options).format(d);
+    return result.replace(/\b(am|pm)\b/gi, (m) => m.toUpperCase());
   } catch {
     return String(dateString);
   }
 }
 
-export function formatTime(dateString: string | null | undefined): string {
+export function formatTime(dateString: string | Date | null | undefined): string {
   if (!dateString) return "N/A";
   try {
     const d = new Date(dateString);
     if (isNaN(d.getTime())) return String(dateString);
-    return new Intl.DateTimeFormat("en-IN", {
+    const result = new Intl.DateTimeFormat("en-IN", {
       timeZone: "Asia/Kolkata",
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     }).format(d);
+    return result.replace(/\b(am|pm)\b/gi, (m) => m.toUpperCase());
   } catch {
     return String(dateString);
   }

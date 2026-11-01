@@ -138,7 +138,7 @@ export function DailyExpenseCardList({
                 </div>
 
                 <span className="text-[11px] font-medium text-muted-foreground">
-                  {formatDate(expense.expense_date)}
+                  {formatDate(expense.created_at || (expense as any).createdAt || expense.expense_date)}
                 </span>
               </div>
 

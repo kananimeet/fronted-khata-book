@@ -163,7 +163,7 @@ export function DailyExpenseTable({
                   <td className="py-3 px-4 whitespace-nowrap">
                     <div className="space-y-1">
                       <p className="font-semibold text-foreground">
-                        {formatDate(expense.expense_date)}
+                        {formatDate(expense.created_at || (expense as any).createdAt || expense.expense_date)}
                       </p>
                       <CategoryBadge category={expense.category} size="sm" />
                     </div>
